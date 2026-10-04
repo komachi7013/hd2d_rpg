@@ -1,0 +1,6 @@
+.DS_Store
+.codex
+.venv
+
+dist/
+node_modules/
