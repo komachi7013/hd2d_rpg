@@ -1,0 +1,128 @@
+[
+  {
+    "id": "yuu",
+    "prompt": "Production game sprite sheet, crisp beautiful Japanese RPG pixel art. Exactly 4 rows by 4 columns equal invisible cells, square canvas. Same young male hero Yuu in all 16 cells: tousled dark brown hair, ivory tunic, short midnight teal cloak, brown belt and boots, small blue diamond pendant. Full body, slightly above 3/4 RPG view. Canonical four-direction walking: row 1 facing down, row 2 left, row 3 right, row 4 up. Columns neutral, left step, neutral, right step. Consistent head/body scale and camera distance, centered body inside central 65% of each cell, fixed foot baseline, generous padding. No weapon yet. Entire limbs and cloak inside cell. 100% flat solid #FF00FF background, no shadow ground, no text, no grid lines, no borders.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-cd48c1df-e73f-45e5-900b-1dcd7151ddf1.png",
+    "selected": true
+  },
+  {
+    "id": "lilia",
+    "prompt": "Exactly 4 by 4 canonical directional walking sprite sheet for Lilia, same style as crisp premium Japanese pixel RPG sprites. Young herbalist girl, chestnut long braid, cream dress, sage green hooded shoulder cape, brown boots, small herb satchel, gentle face. Rows down,left,right,up; columns neutral,left step,neutral,right step. Same full-body identity, head/body scale and camera distance in every cell; centered central 65% safe area, stable foot line, generous flat magenta margin, no crossing edges, no ground shadow, no labels, no lines, no text. Background 100% solid #FF00FF.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-6b332a73-42dd-4cce-8b71-f1201b1b49f6.png",
+    "selected": false
+  },
+  {
+    "id": "lilia2",
+    "prompt": "Strictly 4 ROWS x 4 COLUMNS equal square slots. One Lilia herbalist girl in crisp Japanese RPG pixel art, brown braid, cream dress, sage cape hood, brown boots, herb satchel. Each sprite must occupy only central 60% width and 60% height of its own equal slot. Center at slot horizontal 50%, feet at slot vertical 80%, head no higher than 20%. Rows facing down,left,right,up, each columns neutral,left step,neutral,right step. IMPORTANT all four rows spaced uniformly, last row heads fully below last-row boundary. No body parts crossing invisible slot boundaries. Same anatomical scale all frames. Flat #FF00FF background no gradients, ground, shadow, lines, text.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-49afe936-4516-4542-bbb5-3a5ec662de0e.png",
+    "selected": true
+  },
+  {
+    "id": "boss",
+    "prompt": "Game asset sheet, exactly 2x2 equal invisible cells. Crisp high quality Japanese RPG pixel art matching dark forest fantasy. Four subtle idle loop frames of ONE enormous black horned beast, front 3/4 facing left: gorilla bear-like muscular black body, two long obsidian horns, violet eyes and violet cracks on chest, attached dark purple mist only tightly around shoulders. Root both feet and pelvis at identical positions, torso vertical breathing compression, no lateral sway. Same body camera and scale in every frame, entire silhouette contained central 65% area, horns feet and mist inside every cell, generous magenta padding. 100% flat solid #FF00FF background no ground shadow, no text, no grid lines.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-a7bcd364-38bc-49e2-8875-f300e03a2dae.png",
+    "selected": true
+  },
+  {
+    "id": "wolf",
+    "prompt": "Exactly 2x2 equal invisible cell pixel art game creature idle sprite sheet, FOUR frames of ONE charcoal wolf possessed by dark violet fog. 3/4 side view facing left, pale violet eyes, tufted silver mane, tail curled inward; central fixed torso, in-place breathing, no whole body travel. Consistent subject scale, all snout paws tail and tightly attached mist contained central 65% safe silhouette box every cell. Generous padding. Solid flat #FF00FF background, no shadow ground, no labels, no lines, no text. Premium Japanese RPG pixel art.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-a46cf486-d210-46c6-bf5c-6011acc15b12.png",
+    "selected": true
+  },
+  {
+    "id": "moth",
+    "prompt": "Exactly 2x2 equal invisible cells, four idle hover frames of one beautiful eerie giant dusk moth monster, purple black wings with pale lunar eye markings, small charcoal body, facing left in 3/4 view, crisp Japanese RPG pixel art. Wing fold pulse, same scale and fixed central body root. Full silhouette inside central 65% of each cell, generous padding; 100% flat #FF00FF background. No grid, no text, no ground.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-76b825e0-e24e-47db-9950-be7f8a9d9af6.png",
+    "selected": false
+  },
+  {
+    "id": "moth2",
+    "prompt": "SQUARE CANVAS exactly 2 rows x2 columns equal square cells. Four subtle hover-loop frames of one dark violet lunar moth monster, pixel art. Keep wings mostly partly folded, wing tips strictly confined CENTRAL 60% WIDTH AND HEIGHT of each cell, small readable body and pale eye-patterns. Fixed body center at cell 50%,50%. Same scale, no wing crossing into adjacent row, massive magenta margins. Facing left 3/4. Pure flat solid #FF00FF, no text, borders, lines, ground, shadow.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-94fa6037-dba3-46de-9d0e-5b5a1aaa69a7.png",
+    "selected": true
+  },
+  {
+    "id": "attack",
+    "prompt": "Use image 1 as exact Yuu identity and image 2 as 2x2 character scale/root template. Create exactly 4 frames in a 2x2 grid, one compact sword attack body animation facing RIGHT. Image 2 locks exact slot geometry, standing-equivalent anatomy scale, head size, feet line, camera distance. Change ONLY poses: wind-up, short strike, follow-through, recovery. Tousled brown hair, teal cloak, ivory tunic, brown boots, blue diamond pendant. One modest close-held iron sword integrated with hand. No detached slash arc, no glow, no dust, no wide trail. Body anatomical height matches template; do not zoom individual poses. Same root and foot line. Complete subject inside each cell central safe region, no crossing cell edges. Crisp pixel art. Flat solid #FF00FF background, no text lines borders ground.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-11508cd2-35f4-4e85-9e34-bf16b36eef76.png",
+    "selected": true
+  },
+  {
+    "id": "hurt",
+    "prompt": "Use image 1 exact character identity, image 2 exact 2x2 fixed scale/root template. Exactly 4 frames in 2x2 equal grid of Yuu facing RIGHT, one hurt-recoil animation: impact, recoil, small stagger, recovery. Keep feet grounded and torso/head anatomical scale exact. A close-held small iron sword. No FX. Brown spiky hair, ivory tunic, dark teal short cape, brown boots, blue diamond pendant. Keep image 2 standing-equivalent body scale, fixed foot baseline and camera distance across cells. No zooming to individual pose. Full subject central safe region; no limbs cape weapon or FX crossing cell edges. Pure solid flat #FF00FF background. Crisp pixel art, no ground, shadows, labels, borders, lines or text.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-507a7139-6079-4986-a199-fee822473648.png",
+    "selected": true
+  },
+  {
+    "id": "star",
+    "prompt": "Use image 1 exact character identity, image 2 exact 2x2 fixed scale/root template. Exactly 4 frames in 2x2 equal grid of Yuu facing RIGHT, one star sword body attack animation: poised, lift small blue-white sword close to body, compact forward strike, recovery. Sword length same as small iron sword. No detached effects or slash trails. Brown spiky hair, ivory tunic, dark teal short cape, brown boots, blue diamond pendant. Keep image 2 standing-equivalent body scale, fixed foot baseline and camera distance across cells. No zooming to individual pose. Full subject central safe region; no limbs cape weapon or FX crossing cell edges. Pure solid flat #FF00FF background. Crisp pixel art, no ground, shadows, labels, borders, lines or text.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-ba598e95-fb6d-4c11-a314-c9dff6093be9.png",
+    "selected": false
+  },
+  {
+    "id": "star2",
+    "prompt": "Use Yuu character master and 2x2 template exact identity and geometry. Exactly 2x2 four frames of compact star sword body attack facing RIGHT. Pose sword close to torso, lift blade to chest, short thrust with elbow bent, settle. Small silver-blue sword, no wide swing, no slash arc, no dust or detached glow. Head limb torso size equal to template, feet baseline fixed, all body and weapon MUST remain fully inside central 70% width and 78% height of each equal slot with large padding. Brown hair ivory tunic teal short cape brown boots blue pendant. Solid flat #FF00FF, no text ground lines borders.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-d14e5573-c71a-41b9-acb7-746d34654b9b.png",
+    "selected": false
+  },
+  {
+    "id": "star3",
+    "prompt": "Edit the attack sprite sheet just shown, preserve EXACT same four body poses, anatomy size, camera distance, feet positions, scale, 2x2 layout, magenta background and pixel art. Change ONLY iron sword blade material to beautiful pale blue-white star sword with cyan small gem on hilt. Do not add any particles, wide glow, trails or effects. Keep every silhouette pixel envelope near identical. Same brown-haired hero ivory tunic teal cloak brown boots blue pendant. No text.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-53e75e2b-43cd-4af4-8374-939f0a254001.png",
+    "selected": true
+  },
+  {
+    "id": "heal",
+    "prompt": "Use the Lilia master and 2x2 template just shown. Exactly 2x2 same-size full-body pixel art animation frames, Lilia performing healing gesture facing RIGHT: hands together, raising herb, palm out, gentle settle. Brown braid, sage hood cape cream dress boots herb satchel unchanged. Same template camera scale root and foot line. Only body poses no detached effects. Pure flat #FF00FF, large padding, nothing crosses boundaries, no text grids ground shadows.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-baa2c00a-480f-474c-b530-a5a1a65901d0.png",
+    "selected": true
+  },
+  {
+    "id": "title",
+    "prompt": "Use the reference character image just shown as exact identity for Yuu: tousled dark brown hair, ivory tunic, short midnight teal cloak, brown belt boots, blue diamond pendant. Create cinematic 16:9 Japanese fantasy RPG title illustration, richly painted HD-2D atmosphere of deep ancient forest at dawn. On right half the same young hero lying unconscious on moss beneath roots, small old leather bag beside him, visible blue pendant on chest. NO SWORD. Sun shafts from top right, ferns, tiny luminous motes, layered trees in mist, quiet mysterious hopeful mood, teal shadows and warm amber light, clean composition with dark negative space across LEFT half for game menu. No lettering, logos or watermark.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-c86e0d3c-b23c-4537-8927-56b819543064.png",
+    "selected": true
+  },
+  {
+    "id": "fx",
+    "prompt": "SQUARE canvas exactly 2x2 equal invisible cells pixel art game FX, one blue-white star sword slash burst sequence, four frames anticipation small spark, crescent expanding, large starburst crescent, fade fragments. Only detached effect, no character weapon background ground. Compact grouped sparks fully inside central 65% cell safe area same center, pure solid flat #FF00FF background, no text lines borders.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-f7bf22a0-5737-40ca-9823-39d53627c21a.png",
+    "selected": true
+  },
+  {
+    "id": "props",
+    "prompt": "SQUARE canvas exactly 3 rows x3 columns compact RPG pixel art prop pack. One compact object centered each equal square invisible cell, central 60% safe area. row1 mossy small standing stone, old brown leather bag, clump of green herbs; row2 fern shrub, cluster of tiny blue flowers, small stone bowl of blue water; row3 small round ruin fragment with star mark, blue diamond pendant, rustic herb basket. Match enchanted forest palette, crisp pixel edges. All objects isolated whole silhouettes, no ground plates, no tall structures, no edges crossed, pure flat solid #FF00FF background. No text, no grid lines.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-2b097c4a-ba5b-4c63-8230-e07c3fbe862f.png",
+    "selected": true
+  },
+  {
+    "id": "sword",
+    "prompt": "Single isolated complete ancient fantasy sword, vertical blade down, compact ornate silver hilt and blue diamond jewel, iron blade with rusty flecks that fade toward glowing cyan tip, crisp Japanese RPG pixel art. Full sword centered, fills central 65% height, large padding, pure flat solid #FF00FF background. No text ground shadows labels borders.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-5da998c9-6173-4ef4-8c36-51630176e03a.png",
+    "selected": true
+  },
+  {
+    "id": "mural",
+    "prompt": "Wide 3:2 flat front-facing ancient stone relief mural for fantasy RPG temple wall. Carved weathered slate-grey stone, heroic figure raising a star sword on left, huge coiling black dragon covering the sky on right, constellations in background. Mysterious worn chisel marks and thin pale cyan luminous grooves, readable strong silhouettes, HD-2D aesthetic detailed stone surface. No words, letters, UI, frame, no perspective room or people in front.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-fb8e9bc1-01a2-4cb5-9ec5-2e48756d6258.png",
+    "selected": true
+  },
+  {
+    "id": "tree",
+    "prompt": "Single isolated large ancient forest tree game environmental prop, complete trunk and canopy. Rich crisp Japanese HD-2D pixel-inspired painted style, dark moss-covered twisting oak trunk, deep emerald and sage clustered leaves, small warm sunlit upper-right highlights, visible roots. Front-facing 3/4 slightly from above, upright centered entire tree fills only 70% height and width with generous padding. No landscape or ground plate. Solid flat #FF00FF background, no text shadow border.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-145a3a5f-6893-4b46-84c7-66c062d43239.png",
+    "selected": true
+  },
+  {
+    "id": "ground",
+    "prompt": "Seamless tiling texture for 3D fantasy forest ground, flat overhead view, rich dark emerald moss, small earth flecks, tiny fern fragments, damp leaves, tasteful Japanese HD-2D pixel inspired painted texture, no large objects, no perspective, no directional lighting, no shadows. All edges seamlessly repeat. Square full bleed texture, no text border.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-3a191b17-e88c-48c1-9609-aa88bb828137.png",
+    "selected": true
+  },
+  {
+    "id": "path",
+    "prompt": "Seamless tiling texture for 3D fantasy forest dirt footpath, flat overhead, muted warm brown earth with fine small pebbles, a few tiny moss patches and autumn leaves. Japanese HD-2D pixel-inspired painted texture. No large objects, no perspective directional lighting shadows. All edges seamlessly tile. Square full bleed texture no text border.",
+    "source": "/Users/komachi/.codex/generated_images/01a1067a-17dd-7762-8734-8cf1b3403a91/exec-e2d075ac-9c26-4b25-bbb8-b93a7c2a9d8b.png",
+    "selected": true
+  }
+]

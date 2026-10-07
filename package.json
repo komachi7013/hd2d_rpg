@@ -1,0 +1,24 @@
+{
+  "name": "hoshiken-prologue",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "test": "tsx --test tests/*.test.ts",
+    "format": "prettier --write src tests scripts/*.mjs package.json tsconfig.json vite.config.ts README.md docs/*.md",
+    "test:browser": "node scripts/awakening-healing-checks.mjs && node scripts/revision-checks.mjs && node scripts/browser-edges.mjs && node scripts/audio-fallback.mjs && node scripts/battle-visual.mjs && node scripts/playthrough.mjs"
+  },
+  "dependencies": {
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.1",
+    "@types/three": "^0.180.0",
+    "prettier": "^3.9.9",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.7"
+  }
+}

@@ -1,0 +1,455 @@
+:root {
+  font-family: 'Noto Serif JP', 'Yu Mincho', serif;
+  color: #f0ecda;
+  background: #142325;
+  font-synthesis: none;
+  --gold: #c5b881;
+  --muted: #b9c4b3;
+  --panel: rgba(13, 29, 32, 0.95);
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  overflow: hidden;
+}
+button,
+input {
+  font: inherit;
+}
+button {
+  color: inherit;
+  cursor: pointer;
+}
+#world,
+#ui {
+  position: fixed;
+  inset: 0;
+}
+#world canvas {
+  display: block;
+}
+#ui {
+  pointer-events: none;
+}
+.title {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(5, 22, 24, 0.8), rgba(5, 22, 24, 0.1) 75%),
+    url('/assets/title.png') center/cover;
+  display: flex;
+  align-items: center;
+  padding: 8vw;
+  pointer-events: auto;
+}
+.title-content {
+  width: 490px;
+  max-width: 80vw;
+}
+.eyebrow {
+  font-family: serif;
+  font-size: 12px;
+  letter-spacing: 0.45em;
+  color: var(--gold);
+  margin-bottom: 25px;
+}
+.title h1 {
+  font-weight: 500;
+  font-size: clamp(40px, 5vw, 76px);
+  letter-spacing: 0.13em;
+  line-height: 1.5;
+  margin: 0;
+  text-shadow: 0 4px 30px #091d23;
+}
+.subtitle {
+  font-size: 14px;
+  letter-spacing: 0.4em;
+  color: #c7d0c1;
+  margin: 12px 0 40px;
+}
+.rule {
+  width: 70px;
+  height: 1px;
+  background: var(--gold);
+  margin: 28px 0;
+}
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  max-width: 340px;
+}
+.choices button,
+.commands button {
+  background: transparent;
+  border: 1px solid transparent;
+  text-align: left;
+  padding: 13px 20px;
+  letter-spacing: 0.15em;
+  transition: background 0.2s;
+}
+.choices button:focus,
+.choices button:hover,
+.commands button:focus,
+.commands button:hover {
+  outline: 0;
+  border-color: #b8b58c88;
+  background: #b5c6a514;
+}
+.choices button:focus:before,
+.commands button:focus:before {
+  content: '◆';
+  font-size: 9px;
+  color: var(--gold);
+  margin-right: 14px;
+}
+.choices button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.title-foot {
+  position: absolute;
+  bottom: 28px;
+  left: 8vw;
+  color: #c1c9bc;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+.status {
+  position: absolute;
+  top: 28px;
+  left: 32px;
+  background: linear-gradient(90deg, #10282ce8, transparent);
+  padding: 12px 25px 12px 15px;
+  font-size: 14px;
+  border-left: 2px solid var(--gold);
+}
+.status .area {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: #c5d1bb;
+  margin-bottom: 8px;
+}
+.status strong {
+  font-size: 19px;
+  font-weight: 500;
+}
+.hp {
+  display: inline-block;
+  width: 100px;
+  height: 3px;
+  background: #203e42;
+  margin-left: 14px;
+  vertical-align: middle;
+}
+.hp span {
+  display: block;
+  height: 100%;
+  background: #9bc9a1;
+}
+.objective {
+  position: absolute;
+  right: 32px;
+  top: 30px;
+  text-align: right;
+  font-size: 13px;
+  text-shadow: 0 2px 8px #000;
+}
+.objective small {
+  display: block;
+  letter-spacing: 0.25em;
+  color: #c9be91;
+  font-size: 10px;
+  margin-bottom: 7px;
+}
+.help {
+  position: absolute;
+  bottom: 24px;
+  left: 32px;
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  color: #e3e2ce;
+  text-shadow: 0 1px 5px #000;
+}
+.prompt {
+  position: absolute;
+  left: 50%;
+  bottom: 20%;
+  transform: translateX(-50%);
+  padding: 10px 22px;
+  border: 1px solid #c1b58a66;
+  background: #12272ce6;
+  font-size: 13px;
+}
+.dialogue {
+  position: absolute;
+  bottom: 5%;
+  left: 12%;
+  right: 12%;
+  background: var(--panel);
+  border: 1px solid #a0ad8a66;
+  border-top: 2px solid var(--gold);
+  padding: 24px 36px 30px;
+  min-height: 160px;
+  box-shadow: 0 15px 50px #0006;
+  pointer-events: auto;
+}
+.speaker {
+  color: var(--gold);
+  letter-spacing: 0.18em;
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+.text {
+  font-size: 18px;
+  line-height: 1.95;
+  letter-spacing: 0.06em;
+}
+.next {
+  display: block;
+  text-align: right;
+  color: #a9c2bf;
+  font-size: 11px;
+  margin-top: 14px;
+}
+.modal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #07171980;
+  pointer-events: auto;
+}
+.card {
+  width: 480px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  background: var(--panel);
+  border: 1px solid #bac09a70;
+  padding: 36px 42px;
+  box-shadow: 0 12px 70px #0007;
+}
+.card h2 {
+  font-weight: 500;
+  font-size: 25px;
+  letter-spacing: 0.12em;
+  margin: 0 0 20px;
+}
+.card p {
+  font-size: 14px;
+  color: #c5ceb8;
+  line-height: 1.9;
+}
+.card .choices {
+  max-width: none;
+}
+.card label {
+  display: block;
+  margin: 18px 0;
+}
+.card input[type='range'] {
+  width: 100%;
+  accent-color: #9bbdb6;
+}
+.battle-label {
+  position: absolute;
+  top: 24%;
+  right: 29%;
+  font-size: 20px;
+  text-align: center;
+  text-shadow: 0 2px 5px #000;
+}
+.battle-label small {
+  display: block;
+  font-size: 13px;
+  margin-top: 9px;
+  color: #ccd8bd;
+}
+.battle-ui {
+  position: absolute;
+  bottom: 5%;
+  left: 10%;
+  right: 10%;
+  display: flex;
+  gap: 20px;
+  align-items: stretch;
+  pointer-events: auto;
+}
+.commands {
+  width: 235px;
+  background: var(--panel);
+  border: 1px solid #bcc19c66;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
+.commands button:disabled {
+  opacity: 0.4;
+}
+.battle-log {
+  flex: 1;
+  background: var(--panel);
+  border-top: 2px solid var(--gold);
+  padding: 24px 28px;
+  font-size: 17px;
+  line-height: 1.8;
+}
+.battle-log small {
+  display: block;
+  color: #b9c6b2;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+.toast {
+  position: absolute;
+  top: 110px;
+  left: 32px;
+  font-size: 12px;
+  color: #e2dcae;
+  background: #172b2de6;
+  padding: 10px 18px;
+}
+.loading,
+.fatal {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  line-height: 2.3;
+  letter-spacing: 0.15em;
+  background: #14272b;
+  padding: 30px;
+}
+.ending {
+  background: radial-gradient(ellipse at 50% 30%, #4b747559, #091d25ee);
+  text-align: center;
+}
+.ending .card {
+  width: 600px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+.ending h2 {
+  font-size: 38px;
+}
+.ending .choices {
+  margin: 35px auto 0;
+}
+.ending button {
+  text-align: center;
+}
+.complete-mark {
+  font-size: 12px;
+  letter-spacing: 0.4em;
+  color: var(--gold);
+  margin: 24px 0;
+}
+.low {
+  color: #f1a987;
+}
+@media (max-width: 800px) {
+  .dialogue {
+    left: 5%;
+    right: 5%;
+    padding: 20px;
+  }
+  .text {
+    font-size: 16px;
+  }
+  .objective {
+    max-width: 45%;
+    right: 18px;
+  }
+  .status {
+    left: 18px;
+  }
+  .battle-ui {
+    left: 5%;
+    right: 5%;
+    gap: 10px;
+  }
+  .commands {
+    width: 180px;
+  }
+  .battle-log {
+    font-size: 14px;
+    padding: 16px;
+  }
+  .title {
+    padding: 7vw;
+  }
+  .help {
+    font-size: 9px;
+    left: 18px;
+  }
+  .card {
+    padding: 28px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.commands button small {
+  display: block;
+  font-size: 10px;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  margin-top: 8px;
+}
+.commands {
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+#awakening-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+.pendant-glow,
+.surprise-mark {
+  display: none;
+  position: absolute;
+  left: var(--hero-x);
+}
+#awakening-overlay[data-phase='pendant'] .pendant-glow {
+  display: block;
+  top: var(--hero-y);
+  width: calc(var(--hero-size) * 1.4);
+  height: calc(var(--hero-size) * 1.2);
+  transform: translate(-50%, -85%);
+  background: radial-gradient(
+    ellipse,
+    #6fff665e 10%,
+    #58ff4d25 42%,
+    transparent 70%
+  );
+}
+#awakening-overlay[data-phase='pendant'] .surprise-mark {
+  display: block;
+  top: calc(var(--hero-y) - var(--hero-size) * 0.9);
+  transform: translate(-50%, -100%);
+  color: #ff3535;
+  font: 900 32px/1 sans-serif;
+  text-shadow:
+    0 2px 3px #300,
+    0 0 8px #fff8;
+}
+.awakening-flash {
+  position: absolute;
+  inset: 0;
+  background: #b9e9ff;
+  opacity: var(--flash-opacity, 0);
+}

@@ -1,0 +1,17 @@
+{
+  "greenPendantAndRedSurprise": true,
+  "twoTimed1500msPhases": true,
+  "expiresWithoutAdvancingDialogue": true,
+  "noGlowRestartAtCommandMenu": true,
+  "healTurns": [
+    1,
+    3,
+    5
+  ],
+  "restTurns": [
+    2,
+    4
+  ],
+  "newBattleResetsRest": true,
+  "errors": []
+}

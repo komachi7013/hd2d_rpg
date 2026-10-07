@@ -1,0 +1,12 @@
+{
+  "keyboardSettings": true,
+  "zeroVolumePersistence": true,
+  "corruptSavePreserved": true,
+  "overwriteConfirmation": true,
+  "retryRestoresHPAndHerbs": true,
+  "resize": [
+    960,
+    640
+  ],
+  "errors": []
+}

@@ -1,0 +1,38 @@
+{
+  "completed": true,
+  "battleCount": 6,
+  "seen": [
+    "forestShot",
+    "霧憑きの狼",
+    "shifted",
+    "宵羽の魔蛾",
+    "神殿の霧憑き",
+    "黒角の獣"
+  ],
+  "saved": {
+    "version": 1,
+    "map": "temple",
+    "x": 0,
+    "z": -20,
+    "hp": 56,
+    "herbs": 2,
+    "lilia": true,
+    "sword": true,
+    "starSword": true,
+    "complete": true,
+    "flags": [
+      "heardCry",
+      "skill:star-slash"
+    ],
+    "defeated": [
+      "rescue",
+      "wolf1",
+      "moth1",
+      "moth2",
+      "guardian",
+      "boss"
+    ]
+  },
+  "errors": [],
+  "elapsedSeconds": 128.138
+}

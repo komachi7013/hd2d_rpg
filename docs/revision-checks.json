@@ -1,0 +1,16 @@
+{
+  "nestedSkills": true,
+  "nestedItems": true,
+  "cancelDoesNotConsumeTurns": true,
+  "heldConfirmDoesNotLeak": true,
+  "heldMovementDoesNotLeak": true,
+  "learnedSkillsSavedInV1Flags": true,
+  "emptyInventory": true,
+  "partyFirstFrame": {
+    "battleEnd": true,
+    "mapChange": true,
+    "resume": true
+  },
+  "smoothWalking": true,
+  "errors": []
+}
