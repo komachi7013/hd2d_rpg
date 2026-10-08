@@ -1,0 +1,69 @@
+{
+  "completed": true,
+  "encounters": [
+    "鐘楼の霧憑き",
+    "記憶喰いの魔蛾",
+    "霧憑きの鐘守"
+  ],
+  "prayed": true,
+  "healed": true,
+  "sawWarning": true,
+  "checkedMenus": true,
+  "final": {
+    "version": 1,
+    "map": "road",
+    "x": 0,
+    "z": 10,
+    "hp": 66,
+    "herbs": 3,
+    "lilia": true,
+    "sword": true,
+    "starSword": true,
+    "complete": true,
+    "flags": [
+      "skill:star-slash",
+      "skill:recovery",
+      "ch01:title",
+      "ch01:keeper",
+      "ch01:belfry",
+      "xp:mist1",
+      "ch01:ward",
+      "xp:mist2",
+      "skill:prayer",
+      "ch01:prayer",
+      "xp:bellkeeper",
+      "ch01:boss",
+      "ch01:restored",
+      "ch01:return",
+      "ch01:emblem",
+      "ch01:complete"
+    ],
+    "defeated": [
+      "rescue",
+      "boss",
+      "mist1",
+      "mist2",
+      "bellkeeper"
+    ],
+    "chapter": {
+      "number": 2,
+      "stage": "complete",
+      "titleShown": true,
+      "liliaHP": 78,
+      "party": {
+        "hero": {
+          "level": 3,
+          "xp": 65,
+          "mp": 8
+        },
+        "lilia": {
+          "level": 3,
+          "xp": 65,
+          "mp": 24
+        }
+      }
+    }
+  },
+  "errors": [],
+  "elapsedSeconds": 148.451
+}

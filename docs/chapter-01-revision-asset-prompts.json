@@ -1,0 +1,104 @@
+[
+  {
+    "asset": "lilia-guard",
+    "tool": "built-in image_gen",
+    "prompt": "Edit the 2x2 character anchor sheet just shown into a GUARD / DEFEND body animation for the exact same young healer Lilia. Image 1 is identity master, image 2 locks slot position, camera distance, anatomy size, body root and grounded foot line. Preserve green hood, long brown braid, cream dress with green cloak trim, small brown herb bag and brown boots. Side-facing RIGHT. Four phases: tuck chin and bend knees slightly; raise both forearms close to face/chest in a protective crossed-arm brace; hold and absorb a small pressure; settle in that same defensive posture. No attacking or lunging, no casting or healing gestures, no stagger, no sword, no shield or new equipment, no magic aura, no particles. Keep body height and anatomical scale matched to the accepted master and anchor, same head/torso/limb thickness; only small natural knee flex. Exactly 4 equal slots in 2x2 on 1024x1024, generous original margins, full braid, hood and dress fully contained in every slot, fixed feet and pelvis, no edge crossing. Crisp original HD-2D pixel art. Solid flat #FF00FF magenta background, no gradients, floor, shadows, borders, labels, text or UI.",
+    "raw": "art-source/chapter-01/revision/lilia-guard/raw-sheet.png",
+    "runtime": "public/assets/chapter-01/lilia-guard.png",
+    "qc": {
+      "frame_count": 4,
+      "valid_frame_count": 4,
+      "empty_count": 0,
+      "edge_touch_count": 0,
+      "paste_clamped_count": 0,
+      "body_scale_mean": 0.42694255893433264,
+      "output_subject_height_mean": 73.0,
+      "body_scale_cv": 0.004114901362897525,
+      "anchor_x_std": 0.015511199006196724,
+      "anchor_y_std": 0.014147237389448303,
+      "anchor_y_mean": 0.8315831987075929,
+      "profile_body_scale_drift": 0.0686192444144863
+    }
+  },
+  {
+    "asset": "hero-guard",
+    "tool": "built-in image_gen",
+    "prompt": "Edit the 2x2 character anchor sheet just shown into a DEFEND / GUARD body animation for the exact same young RPG hero Yuu. Image 1 is the exact identity master; image 2 locks the four slot locations, camera distance, anatomical size, body root and feet line. Preserve brown spiky hair, youthful face, cream tunic, brown leather belt and boots, dark teal short cape, same head/torso/limb thickness. Side-facing RIGHT. Four phases: brace with knees slightly flexed; hold a short silver-blue sword DIAGONALLY IN FRONT OF CHEST with both hands to block; absorb slight pressure without moving feet; settle into same protective block. This is a defensive pose, NO sword swinging, no attack lunge, no throwing, no hurt or staggering. Full body always grounded in same slot, keep the sword close to torso, no slash arcs, auras, particles, detached FX. Do not shrink or zoom the body compared to the anchor; natural small knee flex is allowed but standing-equivalent anatomy scale must stay identical. Exactly 4 frames in 2x2 on 1024x1024. Keep the original anchor margins and fixed foot line, full sword and hair inside each cell, zero edge crossing. Crisp original HD-2D pixel art. Solid flat #FF00FF magenta background, no gradients, floor, shadows, labels, gridlines or UI.",
+    "raw": "art-source/chapter-01/revision/hero-guard/raw-sheet.png",
+    "runtime": "public/assets/chapter-01/hero-guard.png",
+    "qc": {
+      "frame_count": 4,
+      "valid_frame_count": 4,
+      "empty_count": 0,
+      "edge_touch_count": 0,
+      "paste_clamped_count": 0,
+      "body_scale_mean": 0.4485758768140962,
+      "output_subject_height_mean": 82.25,
+      "body_scale_cv": 0.005057418941893976,
+      "anchor_x_std": 0.018613438807436034,
+      "anchor_y_std": 0.012533215387062084,
+      "anchor_y_mean": 0.8372374798061388,
+      "profile_body_scale_drift": 0.06232226635599891
+    }
+  },
+  {
+    "asset": "villager-child",
+    "tool": "built-in image_gen",
+    "prompt": "Production HD-2D JRPG NPC sprite sheet, exactly 4 equal slots in a 2x2 grid on a 1024x1024 square canvas. NEW village child boy age 7, short straight black hair, a red cloth cap, blue short tunic, tan knee length shorts, tiny brown shoes, a small patched satchel. Clearly a young child with child proportions: large head, short legs, small narrow shoulders; playful but puzzled face. Distinct from the teenage hero Yuu and the healer Lilia, no sword, no cape, no green dress. Match the reference image's crisp pixel art rendering style only. Full body slightly-above front-facing RPG view. Four subtle breathing idle phases. Same camera distance, same scale, fixed feet and pelvis, body centered within central 60% safe region of every cell, generous empty margin on all sides, no clipping or body parts crossing cell edges. Solid flat #FF00FF magenta background, no gradients, floor, shadows, text, labels, guides or UI.",
+    "raw": "art-source/chapter-01/revision/villager-child/raw-sheet.png",
+    "runtime": "public/assets/chapter-01/villager-child.png",
+    "qc": {
+      "frame_count": 4,
+      "valid_frame_count": 4,
+      "empty_count": 0,
+      "edge_touch_count": 0,
+      "paste_clamped_count": 0,
+      "body_scale_mean": 0.4003460820472621,
+      "output_subject_height_mean": 107.0,
+      "body_scale_cv": 0.0013383092297314428,
+      "anchor_x_std": 0.010177385434857944,
+      "anchor_y_std": 0.0022846745757239134,
+      "anchor_y_mean": 0.877221324717286
+    }
+  },
+  {
+    "asset": "bell-keeper",
+    "tool": "built-in image_gen",
+    "prompt": "Production HD-2D JRPG NPC idle sheet, exactly 4 equal cells in a 2x2 square grid, 1024x1024. A NEW middle-aged male village bell keeper, not the elderly mayor in the reference. Match the reference image's crisp pixel art rendering style only. Distinct identity: stocky mature man age 45, short dark navy hair, black moustache, charcoal work trousers, desaturated blue long work coat with leather vest, heavy brass key ring and short rope coil at belt, leather gloves and boots. Full body front-facing slightly above RPG view, worried face, subtle breathing across four frames. Same anatomy scale and camera distance, feet and pelvis fixed at identical coordinate in every slot, full body centered inside central 65% of each cell with empty margin all four sides. No limbs, clothing or tools crossing edges. Flat solid #FF00FF magenta background; no gradient, shadows, floor, guide lines, labels, text or UI.",
+    "raw": "art-source/chapter-01/revision/bell-keeper/raw-sheet.png",
+    "runtime": "public/assets/chapter-01/bell-keeper.png",
+    "qc": {
+      "frame_count": 4,
+      "valid_frame_count": 4,
+      "empty_count": 0,
+      "edge_touch_count": 0,
+      "paste_clamped_count": 0,
+      "body_scale_mean": 0.4940808061520376,
+      "output_subject_height_mean": 107.0,
+      "body_scale_cv": 0.0009217917971168076,
+      "anchor_x_std": 0.0008077544426494665,
+      "anchor_y_std": 0.0,
+      "anchor_y_mean": 0.9176090468497576
+    }
+  },
+  {
+    "asset": "villager-adult",
+    "tool": "built-in image_gen",
+    "prompt": "Production HD-2D JRPG NPC sprite sheet, exactly four equal cells in 2x2 square grid on 1024x1024. NEW adult village baker woman age 35, dark auburn hair in a bun, white head kerchief, warm burgundy work dress, cream baker apron with flour smudges, brown boots, hands resting near apron pockets. Clearly adult, sturdy round build, different identity and hairstyle from Yuu, Lilia, elderly mayor and male bell keeper. Match the crisp pixel art HD-2D style of the reference sheet only, do not copy its face or outfit. Front-facing slightly above RPG view. Full body idle, four phases of tiny breathing, same anatomy size and camera distance across slots, feet and pelvis fixed on same shared foot line. Center full subject within central 65% safe region in each cell, empty magenta margin on all four sides, nothing crossing edges. Flat solid #FF00FF magenta background, no gradients, shadows, floors, text, labels, guides or UI.",
+    "raw": "art-source/chapter-01/revision/villager-adult/raw-sheet.png",
+    "runtime": "public/assets/chapter-01/villager-adult.png",
+    "qc": {
+      "frame_count": 4,
+      "valid_frame_count": 4,
+      "empty_count": 0,
+      "edge_touch_count": 0,
+      "paste_clamped_count": 0,
+      "body_scale_mean": 0.48581979813894893,
+      "output_subject_height_mean": 107.0,
+      "body_scale_cv": 0.00023583797076427474,
+      "anchor_x_std": 0.0,
+      "anchor_y_std": 0.0,
+      "anchor_y_mean": 0.9240710823909531
+    }
+  }
+]

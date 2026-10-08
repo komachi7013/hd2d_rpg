@@ -5,7 +5,7 @@ const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1200, height: 800 } });
 const issues = [];
 page.on('pageerror', (e) => issues.push(e.message));
-await page.goto('http://127.0.0.1:5173');
+await page.goto(process.env.GAME_URL || 'http://127.0.0.1:5173');
 await page.locator('[data-action=new]').waitFor();
 // Keyboard-only settings: Tab reaches slider and checkbox, zero volume persists.
 await page.keyboard.press('ArrowDown');

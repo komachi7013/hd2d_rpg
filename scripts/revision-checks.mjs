@@ -20,7 +20,7 @@ const base = {
   defeated: ['rescue', 'guardian'],
 };
 async function resume(overrides = {}) {
-  await page.goto('http://127.0.0.1:5173');
+  await page.goto(process.env.GAME_URL || 'http://127.0.0.1:5173');
   await page.locator('[data-action=new]').waitFor();
   await page.evaluate(
     (state) =>
@@ -54,7 +54,7 @@ async function resume(overrides = {}) {
   });
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('z');
-  await page.waitForTimeout(120);
+  await page.waitForTimeout(600);
 }
 const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-9, `${a} != ${b}`);
 function assertExplorationPose(frame) {
@@ -135,9 +135,16 @@ assertExplorationPose(returned);
 await page.screenshot({ path: 'docs/screenshots/revision-battle-return.png' });
 
 await resume({ z: -19, hp: 60 });
-await page.keyboard.down('w');
-await page.waitForTimeout(1200);
-await page.keyboard.up('w');
+// Wait for the encounter itself: headless GPU frame rate can vary substantially.
+for (
+  let attempt = 0;
+  attempt < 30 && !(await page.locator('.dialogue').count());
+  attempt++
+) {
+  await page.keyboard.down('w');
+  await page.waitForTimeout(400);
+  await page.keyboard.up('w');
+}
 for (let i = 0; i < 3; i++) await page.keyboard.press('z');
 await page.locator('[data-action=attack]').waitFor();
 assert.equal(await page.locator('[data-action=skills]').count(), 0);
@@ -211,9 +218,15 @@ assert.ok(saved.flags.includes('skill:star-slash'));
 assert.deepEqual(Object.keys(saved).sort(), Object.keys(base).sort());
 
 await resume({ z: -19, herbs: 0 });
-await page.keyboard.down('w');
-await page.waitForTimeout(1200);
-await page.keyboard.up('w');
+for (
+  let attempt = 0;
+  attempt < 30 && !(await page.locator('.dialogue').count());
+  attempt++
+) {
+  await page.keyboard.down('w');
+  await page.waitForTimeout(400);
+  await page.keyboard.up('w');
+}
 for (let i = 0; i < 3; i++) await page.keyboard.press('z');
 await page.keyboard.press('ArrowUp');
 await page.keyboard.press('z');

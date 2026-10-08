@@ -41,3 +41,25 @@
 端末内の明朝体・セリフ体を使用。フォントのダウンロードや同梱はありません。
 
 生成元・フレーム・GIF・QC は `art-source/` に整理し、公開用には `public/assets/` の実行画像だけを配置しています。処理メタデータ内のパスは処理時点の記録です。
+
+## 第一章の追加素材（2026年10月7日）
+
+組み込み ImageGen と指定 generate2dsprite を使用。全処理は `.venv/bin/python`。
+
+| 素材       | 用途               | 出力                                |
+| ---------- | ------------------ | ----------------------------------- |
+| bellkeeper | 霧憑きの鐘守       | 3×3、9フレーム、256pxセル、足元整列 |
+| spirit     | 霧を払った守護精霊 | 同じ精霊を参照編集、3×3、9フレーム  |
+| tower      | 村の旧鐘楼         | 単体生成、512px透過画像             |
+| cottage    | アルネ村の民家     | 単体生成、512px透過画像             |
+| keeper     | 鐘守・長老         | 2×2、4フレーム、128pxセル           |
+
+全素材でstrict QC合格、出力端接触・空フレーム・paste clampなし。プロンプトは `chapter-01-asset-prompts.json` と各素材の `prompt-used.txt`。生成元、透過シート、抽出フレーム、GIF、QCは `art-source/chapter-01/`、実行画像は `public/assets/chapter-01/`。
+
+第一章の通常敵・仲間・一閃・回復・小物・自然素材は既存を再利用。村・黒い霧の環境音、予兆、復旧後の鐘をオリジナルWeb Audio合成音として追加。
+
+## NPC差し替え・防御の追加素材
+
+組み込みImageGenで鐘守 `bell-keeper`、大人 `villager-adult`、子ども `villager-child` を各2×2で生成し、使い回していたユウ・リリア・年配NPCから差し替え。長老は旧年配NPCのまま。ユウ `hero-guard`、リリア `lilia-guard` は各2×2の専用防御姿勢。既存のマスターフレームと足元テンプレートを参照し、人物の既存scale profileを使って処理。
+
+5種とも `.venv/bin/python` とgenerate2dspriteで処理し、strict QC合格。空フレーム・端接触・クランプなし、body-scale CV ≤0.08、anchor std ≤0.05。防御素材の旧profileからの尺度差は約6〜7%。生成元・透過シート・GIF・QCは `art-source/chapter-01/revision/`、実行画像は `public/assets/chapter-01/`、プロンプトは `chapter-01-revision-asset-prompts.json`。

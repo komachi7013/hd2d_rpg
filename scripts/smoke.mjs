@@ -6,7 +6,7 @@ page.on('pageerror', (e) => errors.push(e.message));
 page.on('console', (m) => {
   if (m.type() === 'error') errors.push(m.text());
 });
-await page.goto('http://127.0.0.1:5173');
+await page.goto(process.env.GAME_URL || 'http://127.0.0.1:5173');
 await page.locator('[data-action=new]').waitFor({ timeout: 30000 });
 await page.screenshot({ path: 'docs/screenshots/01-title.png' });
 await page.keyboard.press('Enter');

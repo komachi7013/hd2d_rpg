@@ -1,7 +1,16 @@
 import { enemies, herb, maps, type EnemyId, type MapId } from './data';
 import { canUseSkill, skills, ownedItems } from './abilities';
+import type { ChapterProgress } from './chapter';
+import {
+  actorMaxHP,
+  ensureParty,
+  resetBattleMP,
+  validParty,
+} from './progression';
+import { resolvePartyTurn } from './party-battle';
 export interface State {
   version: 1;
+  chapter?: ChapterProgress;
   map: MapId;
   x: number;
   z: number;
@@ -29,19 +38,28 @@ export const fresh = (): State => ({
   defeated: [],
 });
 export function liliaHeal(s: State): number {
-  if (!s.lilia || s.hp <= 0 || s.hp > 50) return 0;
+  if (s.chapter || !s.lilia || s.hp <= 0 || s.hp > 50) return 0;
   const n = Math.min(30, 100 - s.hp);
   s.hp += n;
   return n;
 }
 export function useHerb(s: State): number {
-  if (s.herbs <= 0 || s.hp <= 0 || s.hp === 100) return 0;
+  if (s.herbs <= 0 || s.hp <= 0 || s.hp >= actorMaxHP(s, 'hero')) return 0;
   s.herbs--;
-  const n = Math.min(herb.heal, 100 - s.hp);
+  const n = Math.min(herb.heal, actorMaxHP(s, 'hero') - s.hp);
   s.hp += n;
   return n;
 }
+export type Actor = 'hero' | 'lilia';
 export interface Battle {
+  enemyActed: boolean;
+  actor: Actor;
+  acted: Actor[];
+  guards: Actor[];
+  forgotten: Record<Actor, number>;
+  armor: boolean;
+  armorAge: number;
+  telegraph: boolean;
   id: EnemyId;
   hp: number;
   turn: number;
@@ -50,7 +68,13 @@ export interface Battle {
   before: State;
 }
 export type Command = 'attack' | 'guard' | `item:${string}` | `skill:${string}`;
+export interface HPChange {
+  target: Actor | 'enemy';
+  amount: number;
+  guarded?: boolean;
+}
 export interface TurnResult {
+  hpChanges: HPChange[];
   lines: string[];
   victory: boolean;
   defeat: boolean;
@@ -58,8 +82,17 @@ export interface TurnResult {
   used: boolean;
 }
 export function beginBattle(s: State, id: EnemyId): Battle {
+  resetBattleMP(s);
   return {
     id,
+    enemyActed: false,
+    actor: s.hp > 0 ? 'hero' : 'lilia',
+    acted: [],
+    guards: [],
+    forgotten: { hero: 0, lilia: 0 },
+    armor: id === 'bellkeeper',
+    armorAge: 0,
+    telegraph: false,
     hp: enemies[id].hp,
     turn: 0,
     awakened: false,
@@ -67,10 +100,17 @@ export function beginBattle(s: State, id: EnemyId): Battle {
     before: structuredClone(s),
   };
 }
-export function resolveTurn(s: State, b: Battle, cmd: Command): TurnResult {
+export function resolveTurn(
+  s: State,
+  b: Battle,
+  cmd: Command,
+  target?: Actor,
+): TurnResult {
+  if (s.chapter) return resolvePartyTurn(s, b, cmd, target);
   const e = enemies[b.id];
   const r: TurnResult = {
     lines: [],
+    hpChanges: [],
     victory: false,
     defeat: false,
     awakening: false,
@@ -96,21 +136,31 @@ export function resolveTurn(s: State, b: Battle, cmd: Command): TurnResult {
   }
   const hit = () => {
     const damage = cmd === 'guard' ? Math.ceil(e.attack / 2) : e.attack;
+    const before = s.hp;
     s.hp = Math.max(0, s.hp - damage);
+    r.hpChanges.push({
+      target: 'hero',
+      amount: s.hp - before,
+      guarded: cmd === 'guard',
+    });
     r.lines.push(`${e.name}の攻撃。ユウに ${damage} ダメージ。`);
   };
   const act = () => {
     if (cmd === 'attack') {
       const damage = s.starSword ? 42 : 24;
+      const before = b.hp;
       b.hp = Math.max(e.boss && !b.awakened ? 1 : 0, b.hp - damage);
+      r.hpChanges.push({ target: 'enemy', amount: b.hp - before });
       r.lines.push(`ユウの攻撃。${e.name}に ${damage} ダメージ。`);
     }
     if (cmd === 'guard') r.lines.push('ユウは身を守っている。');
     if (item?.effect.type === 'restore-hp') {
       const n = useHerb(s);
+      r.hpChanges.push({ target: 'hero', amount: n });
       r.lines.push(`薬草を使った。HP が ${n} 回復。`);
     }
     if (skill?.effect.type === 'defeat-target') {
+      r.hpChanges.push({ target: 'enemy', amount: -b.hp });
       b.hp = 0;
       r.lines.push(`${skill.name}――光の刃が黒い霧を切り裂く！`);
     }
@@ -132,6 +182,7 @@ export function resolveTurn(s: State, b: Battle, cmd: Command): TurnResult {
     } else {
       const n = liliaHeal(s);
       if (n) {
+        r.hpChanges.push({ target: 'hero', amount: n });
         b.liliaRestTurns = 1;
         r.lines.push(`リリアの手当て。HP が ${n} 回復。`);
       }
@@ -153,8 +204,8 @@ export function validState(v: unknown): v is State {
     Number.isFinite(s.z) &&
     Math.abs(s.z) <= maps[s.map].length / 2 &&
     Number.isInteger(s.hp) &&
-    s.hp >= 1 &&
-    s.hp <= 100 &&
+    s.hp >= (s.chapter ? 0 : 1) &&
+    s.hp <= actorMaxHP(s, 'hero') &&
     Number.isInteger(s.herbs) &&
     s.herbs >= 0 &&
     s.herbs <= 99 &&
@@ -165,6 +216,7 @@ export function validState(v: unknown): v is State {
     s.flags.every((f) => typeof f === 'string') &&
     Array.isArray(s.defeated) &&
     s.defeated.every((id) => Object.hasOwn(enemies, id)) &&
+    validChapter(s) &&
     (!s.complete || s.starSword) &&
     (!s.lilia || s.sword)
   );
@@ -178,6 +230,7 @@ export function readSave(): {
     if (!raw) return { state: null, error: null };
     const s = JSON.parse(raw);
     if (!validState(s)) throw Error();
+    ensureParty(s);
     return { state: s, error: null };
   } catch {
     return {
@@ -193,4 +246,49 @@ export function save(s: State): boolean {
   } catch {
     return false;
   }
+}
+
+function validChapter(s: State): boolean {
+  if (s.chapter === undefined)
+    return !['village', 'belfry', 'undercroft', 'sanctum', 'road'].includes(
+      s.map,
+    );
+  const c = s.chapter;
+  return (
+    !!c &&
+    typeof c === 'object' &&
+    [1, 2].includes(c.number) &&
+    [
+      'opening',
+      'investigation',
+      'belfry',
+      'boss',
+      'restoration',
+      'departure',
+      'complete',
+    ].includes(c.stage) &&
+    typeof c.titleShown === 'boolean' &&
+    Number.isInteger(c.liliaHP) &&
+    c.liliaHP >= 0 &&
+    validParty(s) &&
+    c.liliaHP <= actorMaxHP(s, 'lilia') &&
+    (s.hp > 0 || c.liliaHP > 0) &&
+    s.complete &&
+    s.lilia &&
+    s.starSword &&
+    (c.stage !== 'complete' ||
+      (c.number === 2 && s.flags.includes('ch01:complete'))) &&
+    (c.number !== 2 || c.stage === 'complete')
+  );
+}
+export function actorHP(s: State, actor: Actor): number {
+  return actor === 'hero' ? s.hp : (s.chapter?.liliaHP ?? 0);
+}
+export function healActor(s: State, actor: Actor, amount: number): number {
+  const hp = actorHP(s, actor);
+  if (hp <= 0) return 0;
+  const healed = Math.min(amount, actorMaxHP(s, actor) - hp);
+  if (actor === 'hero') s.hp += healed;
+  else if (s.chapter) s.chapter.liliaHP += healed;
+  return healed;
 }

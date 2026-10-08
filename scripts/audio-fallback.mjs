@@ -11,7 +11,7 @@ await p.addInitScript(() => {
     }
   };
 });
-await p.goto('http://127.0.0.1:5173');
+await p.goto(process.env.GAME_URL || 'http://127.0.0.1:5173');
 await p.locator('[data-action=new]').waitFor();
 await p.keyboard.press('z');
 for (let i = 0; i < 4; i++) await p.keyboard.press('z');

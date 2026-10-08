@@ -85,6 +85,23 @@ export class AudioEngine {
   }
   tick() {
     if (document.hidden || !this.ctx || this.track === 'quiet') return;
+    if (this.track === 'mist') {
+      if (this.step++ % 8 === 0) {
+        this.note(73.4, 2.1, 'sine', 0.06);
+        this.note(77.8, 1.8, 'triangle', 0.025);
+      }
+      return;
+    }
+    if (this.track === 'village') {
+      if (this.step++ % 6 === 0)
+        this.note(
+          [196, 220, 261.6, 220][Math.floor(this.step / 6) % 4],
+          1.6,
+          'sine',
+          0.035,
+        );
+      return;
+    }
     const battle = this.track === 'battle';
     const melody = battle
       ? [52, 55, 59, 64, 62, 59, 55, 57, 52, 55, 60, 64, 67, 64, 60, 59]
@@ -112,6 +129,16 @@ export class AudioEngine {
     this.step++;
   }
   fx(kind: string) {
+    if (kind === 'bell') {
+      [261.6, 523.2, 784.8, 1075].forEach((hz, i) =>
+        this.note(hz, 3.2 - i * 0.3, 'sine', 0.15 / (i + 1)),
+      );
+      return;
+    }
+    if (kind === 'warning') {
+      this.note(87.3, 1.2, 'triangle', 0.12);
+      return;
+    }
     const notes: Record<string, number[]> = {
       confirm: [660],
       attack: [220, 110],

@@ -1,5 +1,5 @@
 {
-  "name": "hoshiken-prologue",
+  "name": "hoshiken-rpg",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -8,7 +8,9 @@
     "build": "tsc --noEmit && vite build",
     "test": "tsx --test tests/*.test.ts",
     "format": "prettier --write src tests scripts/*.mjs package.json tsconfig.json vite.config.ts README.md docs/*.md",
-    "test:browser": "node scripts/awakening-healing-checks.mjs && node scripts/revision-checks.mjs && node scripts/browser-edges.mjs && node scripts/audio-fallback.mjs && node scripts/battle-visual.mjs && node scripts/playthrough.mjs"
+    "test:browser": "node scripts/awakening-healing-checks.mjs && node scripts/revision-checks.mjs && node scripts/browser-edges.mjs && node scripts/audio-fallback.mjs && node scripts/battle-visual.mjs && node scripts/playthrough.mjs",
+    "test:chapter": "node scripts/chapter-01-checks.mjs && node scripts/chapter-01-edges.mjs",
+    "test:mp": "node scripts/mp-growth-visual-checks.mjs"
   },
   "dependencies": {
     "three": "^0.180.0"

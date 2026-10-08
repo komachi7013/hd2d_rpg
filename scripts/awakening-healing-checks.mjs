@@ -20,7 +20,7 @@ const seed = {
   defeated: ['rescue', 'guardian'],
 };
 async function boss() {
-  await page.goto('http://127.0.0.1:5173');
+  await page.goto(process.env.GAME_URL || 'http://127.0.0.1:5173');
   await page.locator('[data-action=new]').waitFor();
   await page.evaluate(
     (state) =>

@@ -1,6 +1,6 @@
 import * as T from 'three';
 import { maps, enemies, type MapId, type EnemyId } from '../simulation/data';
-import type { State, Battle } from '../simulation/state';
+import type { State, Battle, Actor } from '../simulation/state';
 import { AwakeningEffects } from './awakening-effects';
 import { PartyPlacement } from './party-placement';
 export class World {
@@ -19,6 +19,9 @@ export class World {
   moving = false;
   direction = 3;
   action = 'walk';
+  guardUntil: Record<Actor, number> = { hero: 0, lilia: 0 };
+  actingActor: Actor = 'hero';
+  effectTarget: Actor = 'hero';
   actionUntil = 0;
   fx: T.Sprite;
   time = 0;
@@ -75,6 +78,16 @@ export class World {
   async load() {
     const loader = new T.TextureLoader();
     const specs: Record<string, string> = {
+      keeper: 'chapter-01/keeper.png',
+      bellKeeper: 'chapter-01/bell-keeper.png',
+      villagerAdult: 'chapter-01/villager-adult.png',
+      villagerChild: 'chapter-01/villager-child.png',
+      heroGuard: 'chapter-01/hero-guard.png',
+      liliaGuard: 'chapter-01/lilia-guard.png',
+      bellkeeper: 'chapter-01/bellkeeper.png',
+      spirit: 'chapter-01/spirit.png',
+      tower: 'chapter-01/tower.png',
+      cottage: 'chapter-01/cottage.png',
       yuu: 'yuu/sheet-transparent.png',
       lilia: 'lilia/sheet-transparent.png',
       attack: 'attack/sheet-transparent.png',
@@ -174,15 +187,9 @@ export class World {
     this.map = map;
     this.placement.reset();
     this.awakeningEffects.reset();
-    for (const child of [...this.environment.children]) {
-      this.environment.remove(child);
-      child.traverse((o) => {
-        if (o instanceof T.Mesh) {
-          o.geometry.dispose();
-          (o.material as T.Material).dispose();
-        }
-      });
-    }
+    this.guardUntil = { hero: 0, lilia: 0 };
+    this.release(this.environment);
+    this.release(this.battleStage);
     this.obstacles = [];
     this.enemySprites.forEach((s) => {
       this.actors.remove(s);
@@ -190,6 +197,10 @@ export class World {
       s.material.dispose();
     });
     this.enemySprites.clear();
+    if (['village', 'belfry', 'undercroft', 'sanctum', 'road'].includes(map)) {
+      this.buildChapter(map);
+      return;
+    }
     const temple = map === 'temple';
     this.scene.fog = new T.FogExp2(
       temple ? 0x182629 : 0x254e4c,
@@ -415,6 +426,196 @@ export class World {
     }
     this.cameraTarget.set(0, 0, maps[map].spawn[1]);
   }
+
+  release(group: T.Group) {
+    for (const child of [...group.children]) {
+      group.remove(child);
+      child.traverse((o) => {
+        if (o instanceof T.Mesh || o instanceof T.Sprite) {
+          if (o instanceof T.Mesh) o.geometry.dispose();
+          const materials = Array.isArray(o.material)
+            ? o.material
+            : [o.material];
+          for (const material of materials) {
+            const map = (material as T.SpriteMaterial).map;
+            if (map && ![...this.textures.values()].includes(map))
+              map.dispose();
+            material.dispose();
+          }
+        }
+      });
+    }
+  }
+  decor(
+    asset: string,
+    size: number,
+    x: number,
+    z: number,
+    frame = 0,
+    cols = 1,
+    rows = 1,
+  ) {
+    const sprite = this.actor(asset, size);
+    sprite.position.set(x, 0.06, z);
+    this.frame(sprite, asset, frame, cols, rows);
+    this.environment.add(sprite);
+    return sprite;
+  }
+  buildChapter(map: MapId) {
+    const outside = map === 'village' || map === 'road';
+    const len = maps[map].length;
+    const bg = outside ? 0x849e97 : 0x15242f;
+    this.scene.fog = new T.FogExp2(bg, outside ? 0.013 : 0.024);
+    this.renderer.setClearColor(bg);
+    const floor = this.box(
+      65,
+      0.8,
+      len + 35,
+      outside ? 0xffffff : 0x293847,
+      0,
+      -0.5,
+      0,
+    );
+    if (outside) {
+      const texture = this.textures.get('ground')!.clone();
+      texture.wrapS = texture.wrapT = T.RepeatWrapping;
+      texture.repeat.set(16, (len + 35) / 4);
+      (floor.material as T.MeshStandardMaterial).map = texture;
+    }
+    for (let z = -len / 2; z < len / 2; z += 2) {
+      const path = this.box(
+        outside ? 7 : 10,
+        0.12,
+        2.05,
+        outside ? 0xffffff : z % 4 ? 0x5a6d73 : 0x64767d,
+        0,
+        0.02,
+        z,
+      );
+      if (outside) {
+        const texture = this.textures.get('path')!.clone();
+        texture.wrapS = texture.wrapT = T.RepeatWrapping;
+        texture.repeat.set(2, 1);
+        (path.material as T.MeshStandardMaterial).map = texture;
+        (path.material as T.MeshStandardMaterial).color.set(0xd2c6ad);
+      }
+      if (!outside) {
+        for (const x of [-6.4, 6.4])
+          this.box(1.3, 1.1, 2.05, 0x304f59, x, 0.1, z);
+        const ward = this.box(0.11, 0.03, 2.05, 0x437b88, -3.2, 0.1, z);
+        ward.userData.ward = 'light';
+        const mist = this.box(0.18, 0.04, 2.05, 0x443453, 3.2, 0.1, z);
+        mist.userData.ward = 'mist';
+      }
+    }
+    if (map === 'village') {
+      for (const z of [18, 5, -8]) {
+        for (const side of [-1, 1]) {
+          const cottage = this.decor('cottage', 10, side * 10, z);
+          cottage.material.depthWrite = true;
+          this.decor('props', 1.8, side * 5.8, z + 3, 3, 3, 3);
+        }
+      }
+      const tower = this.decor('tower', 19, 0, -29);
+      tower.material.depthWrite = true;
+      this.decor('props', 2.4, 4, 16, 5, 3, 3);
+      for (const z of [-17, -3, 11, 24])
+        for (const x of [-17, 17]) this.decor('tree', 9, x, z);
+    } else if (map === 'road') {
+      for (let z = -20; z <= 20; z += 7)
+        for (const x of [-9, 11]) this.decor('tree', 8, x, z);
+    } else {
+      for (let z = -len / 2 + 4; z < len / 2; z += 8) {
+        for (const x of [-7, 7]) {
+          this.mesh(new T.CylinderGeometry(0.65, 0.9, 6, 8), 0x4b6169, x, 3, z);
+          this.box(1.9, 0.45, 1.9, 0x6d7b7e, x, 6, z);
+          const light = new T.PointLight(0x6cb2d8, 9, 11);
+          light.position.set(x, 3, z);
+          this.environment.add(light);
+        }
+      }
+      this.box(19, 7, 0.8, 0x344551, 0, 3.5, -len / 2 - 1);
+      if (map === 'belfry') {
+        this.decor('tower', 15, 0, -20);
+        // The stairs are environment geometry, with a clear path to the north exit.
+        for (let i = 0; i < 5; i++)
+          this.box(6, 0.12 * (i + 1), 1.2, 0x7b8281, 0, 0.06 * i, -10 - i);
+      }
+      if (map === 'sanctum') {
+        const ring = this.mesh(
+          new T.TorusGeometry(4.5, 0.1, 8, 48),
+          0x76a5b2,
+          0,
+          0.18,
+          -9,
+        );
+        ring.rotation.x = -Math.PI / 2;
+        ring.userData.ward = 'light';
+      }
+    }
+    for (const p of maps[map].landmarks) {
+      if (['keeper', 'elder', 'baker', 'child'].includes(p.id)) {
+        const assets: Record<string, string> = {
+          keeper: 'bellKeeper',
+          elder: 'keeper',
+          baker: 'villagerAdult',
+          child: 'villagerChild',
+        };
+        const npc = this.decor(
+          assets[p.id],
+          p.id === 'child' ? 2.5 : 3.4,
+          p.x,
+          p.z,
+          0,
+          2,
+          2,
+        );
+        npc.userData.npcIdle = assets[p.id];
+        npc.userData.npcRole = p.id;
+      } else
+        this.decor(
+          'props',
+          1.8,
+          p.x,
+          p.z,
+          p.id === 'supply' ? 1 : p.id === 'ward' ? 5 : 0,
+          3,
+          3,
+        );
+    }
+    for (const e of maps[map].encounters) {
+      const sprite = this.actor(
+        enemies[e.id].art,
+        e.id === 'bellkeeper' ? 6.7 : 2.8,
+      );
+      sprite.position.set(e.x, 0.1, e.z);
+      this.enemySprites.set(e.id, sprite);
+    }
+    const arena = this.box(26, 0.3, 28, 0x354b57, 0, -0.3, 0);
+    this.battleStage.add(arena);
+    for (const x of [-10, 10]) {
+      const column = this.mesh(
+        new T.CylinderGeometry(0.7, 0.9, 8, 8),
+        0x68777b,
+        x,
+        4,
+        -5,
+      );
+      this.battleStage.add(column);
+    }
+    const backdrop = this.box(25, 9, 0.5, 0x243944, 0, 4, -14);
+    this.battleStage.add(backdrop);
+    const halo = this.mesh(
+      new T.TorusGeometry(4, 0.1, 8, 48),
+      0x5a939d,
+      3,
+      3.5,
+      -13.6,
+    );
+    this.battleStage.add(halo);
+    this.cameraTarget.set(0, 0, maps[map].spawn[1]);
+  }
+
   walkable(x: number, z: number) {
     return (
       Math.abs(x) < 5 &&
@@ -422,14 +623,33 @@ export class World {
       !this.obstacles.some((o) => Math.hypot(o.x - x, o.z - z) < o.r + 0.3)
     );
   }
-  play(action: string, duration = 1) {
+  play(
+    action: string,
+    duration = 1,
+    actor: Actor = 'hero',
+    target: Actor = 'hero',
+  ) {
+    this.actingActor = actor;
+    this.effectTarget = target;
     this.action = action;
+    this.guardUntil[actor] = action === 'guard' ? this.time + duration : 0;
     this.actionUntil = this.time + duration;
   }
   render(s: State, b: Battle | null, dt: number, mode: string) {
     this.time += dt;
     if (this.map !== s.map) this.build(s.map);
     this.environment.children.forEach((o) => {
+      if (o instanceof T.Sprite && o.userData.npcIdle)
+        this.frame(o, o.userData.npcIdle, Math.floor(this.time * 3) % 4, 2, 2);
+      if (o.userData.ward && o instanceof T.Mesh) {
+        (o.material as T.MeshStandardMaterial).color.set(
+          s.flags.includes('ch01:restored')
+            ? 0x6ddccb
+            : o.userData.ward === 'mist'
+              ? 0x443453
+              : 0x437b88,
+        );
+      }
       if (o.userData.landmark === 'sword') o.visible = !s.sword;
       if (o.userData.landmark === 'altar') o.visible = !s.starSword;
     });
@@ -467,7 +687,26 @@ export class World {
       .copy(this.player.position)
       .add(new T.Vector3(0, 1, 1));
     this.companion.visible = s.lilia || s.map === 'entrance';
-    if (this.time < this.actionUntil && this.action !== 'heal') {
+    const guardingHero =
+      inBattle &&
+      (b!.guards.includes('hero') || this.time < this.guardUntil.hero);
+    const guardingLilia =
+      inBattle &&
+      (b!.guards.includes('lilia') || this.time < this.guardUntil.lilia);
+    if (guardingHero) {
+      this.frame(
+        this.player,
+        'heroGuard',
+        Math.min(3, Math.floor((this.time % 0.8) * 5)),
+        2,
+        2,
+      );
+    } else if (
+      this.time < this.actionUntil &&
+      this.action !== 'guard' &&
+      this.action !== 'heal' &&
+      this.actingActor === 'hero'
+    ) {
       this.frame(this.player, this.action, Math.floor(this.time * 9) % 4, 2, 2);
     } else {
       this.frame(
@@ -479,7 +718,15 @@ export class World {
         4,
       );
     }
-    if (this.time < this.actionUntil && this.action === 'heal')
+    if (guardingLilia)
+      this.frame(
+        this.companion,
+        'liliaGuard',
+        Math.min(3, Math.floor((this.time % 0.8) * 5)),
+        2,
+        2,
+      );
+    else if (this.time < this.actionUntil && this.action === 'heal')
       this.frame(this.companion, 'heal', Math.floor(this.time * 7) % 4, 2, 2);
     else
       this.frame(
@@ -497,14 +744,43 @@ export class World {
         const p = maps[s.map].encounters.find((e) => e.id === id)!;
         sprite.position.set(p.x, 0.05, p.z);
       }
-      this.frame(sprite, enemies[id].art, Math.floor(this.time * 3) % 4, 2, 2);
+      if (id === 'bellkeeper') {
+        const rescued = s.flags.includes('ch01:boss');
+        if (!inBattle && rescued) sprite.visible = true;
+        this.frame(
+          sprite,
+          rescued || (inBattle && !b!.armor) ? 'spirit' : 'bellkeeper',
+          Math.floor(this.time * 6) % 9,
+          3,
+          3,
+        );
+      } else
+        this.frame(
+          sprite,
+          enemies[id].art,
+          Math.floor(this.time * 3) % 4,
+          2,
+          2,
+        );
     });
+    if (
+      inBattle &&
+      this.time < this.actionUntil &&
+      this.actingActor === 'lilia' &&
+      this.action === 'attack'
+    )
+      this.companion.position.x +=
+        Math.sin(((this.actionUntil - this.time) / 1.1) * Math.PI) * 0.65;
     this.fx.visible =
       (this.time < this.actionUntil &&
         (this.action === 'star' || this.action === 'heal')) ||
       glow.phase === 'awakening';
     if (this.fx.visible) {
-      this.fx.position.copy(this.player.position);
+      this.fx.position.copy(
+        this.effectTarget === 'lilia' && this.action === 'heal'
+          ? this.companion.position
+          : this.player.position,
+      );
       this.frame(this.fx, 'fx', Math.floor(this.time * 8) % 4, 2, 2);
     }
     const aspect = innerWidth / innerHeight;

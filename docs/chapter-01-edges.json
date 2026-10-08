@@ -1,0 +1,58 @@
+{
+  "interruptedBelfryArrivalResumes": true,
+  "fieldPrayerSingleTarget": true,
+  "fieldRecoverySingleTarget": true,
+  "retryRestoresBothHPAndHerbs": true,
+  "postBossReloadResumesRestorationWithoutRematch": true,
+  "restored": {
+    "version": 1,
+    "map": "village",
+    "x": 0,
+    "z": 19,
+    "hp": 64,
+    "herbs": 3,
+    "lilia": true,
+    "sword": true,
+    "starSword": true,
+    "complete": true,
+    "flags": [
+      "skill:star-slash",
+      "skill:recovery",
+      "skill:prayer",
+      "ch01:title",
+      "ch01:keeper",
+      "ch01:belfry",
+      "ch01:ward",
+      "ch01:prayer",
+      "ch01:boss",
+      "ch01:restored",
+      "ch01:return"
+    ],
+    "defeated": [
+      "rescue",
+      "boss",
+      "mist1",
+      "mist2",
+      "bellkeeper"
+    ],
+    "chapter": {
+      "number": 1,
+      "stage": "departure",
+      "titleShown": true,
+      "liliaHP": 71,
+      "party": {
+        "hero": {
+          "level": 1,
+          "xp": 0,
+          "mp": 24
+        },
+        "lilia": {
+          "level": 1,
+          "xp": 0,
+          "mp": 24
+        }
+      }
+    }
+  },
+  "errors": []
+}

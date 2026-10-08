@@ -307,7 +307,7 @@ button {
 }
 .toast {
   position: absolute;
-  top: 110px;
+  top: 155px;
   left: 32px;
   font-size: 12px;
   color: #e2dcae;
@@ -452,4 +452,142 @@ button {
   inset: 0;
   background: #b9e9ff;
   opacity: var(--flash-opacity, 0);
+}
+
+.party-status {
+  margin-top: 8px;
+}
+.chapter-title {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  background: radial-gradient(ellipse at center, #152b35, #060d13 75%);
+  pointer-events: auto;
+}
+.chapter-title-copy {
+  animation: chapter-reveal 3s ease both;
+}
+.chapter-title p {
+  font-size: 20px;
+  letter-spacing: 0.55em;
+  color: var(--gold);
+}
+.chapter-title h1 {
+  font-weight: 500;
+  font-size: clamp(26px, 4vw, 48px);
+  letter-spacing: 0.18em;
+  margin: 22px;
+}
+.chapter-title small {
+  position: absolute;
+  bottom: 8%;
+  width: 100%;
+  color: #9caaa7;
+  font-size: 11px;
+}
+@keyframes chapter-reveal {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  17%,
+  83% {
+    opacity: 1;
+  }
+}
+.battle-log {
+  max-height: 45vh;
+  overflow-y: auto;
+}
+@media (max-width: 800px) {
+  .hp {
+    width: 65px;
+  }
+  .status {
+    font-size: 12px;
+  }
+}
+
+.chapter-battle-label {
+  top: 12%;
+  right: 25%;
+}
+
+.party-member + .party-member {
+  margin-top: 10px;
+}
+.level {
+  margin: 0 8px;
+  color: var(--gold);
+  font: 12px/1.4 sans-serif;
+}
+.mp-value {
+  margin-top: 5px;
+  color: #adcced;
+  font-size: 12px;
+}
+.mp {
+  display: inline-block;
+  width: 100px;
+  height: 3px;
+  margin-left: 14px;
+  vertical-align: middle;
+  background: #233345;
+}
+.mp span {
+  display: block;
+  height: 100%;
+  background: #84b7df;
+}
+.hp-damage {
+  color: #ff6b67;
+}
+.hp-healing {
+  color: #70b7ff;
+}
+#combat-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+.combat-number {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  font: 800 34px/1 sans-serif;
+  text-shadow:
+    0 2px 2px #07121c,
+    2px 0 2px #07121c,
+    -2px 0 2px #07121c;
+}
+.combat-number.damage {
+  color: #ff6863;
+}
+.combat-number.healing {
+  color: #73b8ff;
+}
+.toast {
+  top: 200px;
+}
+@media (max-width: 800px) {
+  .level {
+    margin: 0 5px;
+  }
+  .hp {
+    width: 55px;
+    margin-left: 8px;
+  }
+  .mp {
+    width: 65px;
+  }
+  .combat-number {
+    font-size: 28px;
+  }
+}
+.skill-cost {
+  display: block;
+  white-space: nowrap;
+  color: #adcced;
+  margin-top: 5px;
 }

@@ -1,0 +1,55 @@
+{
+  "npcs": [
+    {
+      "role": "baker",
+      "asset": "villagerAdult"
+    },
+    {
+      "role": "child",
+      "asset": "villagerChild"
+    },
+    {
+      "role": "elder",
+      "asset": "keeper"
+    },
+    {
+      "role": "keeper",
+      "asset": "bellKeeper"
+    }
+  ],
+  "changes": [
+    {
+      "text": "+42",
+      "color": "rgb(115, 184, 255)",
+      "target": "hero"
+    },
+    {
+      "text": "-7",
+      "color": "rgb(255, 104, 99)",
+      "target": "hero"
+    }
+  ],
+  "mpShortageDisabled": true,
+  "cancelDoesNotConsume": true,
+  "eachEncounterRefillsMP": true,
+  "nextAttackClearsGuard": true,
+  "hudHPChangesColored": true,
+  "fieldMPShortageDisabled": true,
+  "guardAssets": [
+    "heroGuard",
+    "liliaGuard"
+  ],
+  "growthSaved": {
+    "hero": {
+      "level": 2,
+      "xp": 20,
+      "mp": 16
+    },
+    "lilia": {
+      "level": 2,
+      "xp": 20,
+      "mp": 29
+    }
+  },
+  "errors": []
+}

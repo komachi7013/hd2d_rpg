@@ -9,7 +9,7 @@ page.on('pageerror', (e) => errors.push(e.message));
 page.on('console', (m) => {
   if (m.type() === 'error') errors.push(m.text());
 });
-await page.goto('http://127.0.0.1:5173');
+await page.goto(process.env.GAME_URL || 'http://127.0.0.1:5173');
 await page.locator('[data-action=new]').waitFor({ timeout: 30000 });
 await page.screenshot({ path: 'docs/screenshots/01-title.png' });
 await page.keyboard.press('Enter');
@@ -120,15 +120,16 @@ assert.equal(saved.complete, true);
 assert.equal(saved.starSword, true);
 assert.ok(saved.lilia);
 assert.ok(seen.has('宵羽の魔蛾'));
+await page.locator('[data-action=chapter]').click();
+await page.locator('.chapter-title').waitFor();
+await page.waitForTimeout(600);
 await page.keyboard.press('z');
-await page.keyboard.press('ArrowDown');
-await page.keyboard.press('z');
-assert.ok(await page.locator('.ending').count());
+await page.locator('.dialogue').waitFor();
+assert.ok((await page.locator('.text').innerText()).includes('翌朝'));
 await page.reload();
-await page.locator('[data-action=continue]').waitFor();
-await page.keyboard.press('ArrowDown');
-await page.keyboard.press('z');
-assert.ok(await page.locator('.ending').count());
+await page.locator('[data-action=continue]').click();
+await page.locator('.dialogue').waitFor();
+assert.equal(await page.locator('.chapter-title').count(), 0);
 assert.deepEqual(errors, []);
 const result = {
   completed: true,
