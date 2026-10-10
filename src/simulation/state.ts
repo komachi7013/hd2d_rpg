@@ -1,3 +1,4 @@
+import { mapHalfWidth } from './exploration';
 import { enemies, herb, maps, type EnemyId, type MapId } from './data';
 import { canUseSkill, skills, ownedItems } from './abilities';
 import type { ChapterProgress } from './chapter';
@@ -51,7 +52,9 @@ export function useHerb(s: State): number {
   return n;
 }
 export type Actor = 'hero' | 'lilia';
+export type BattleTarget = Actor | 'body' | 'connection:0' | 'connection:1';
 export interface Battle {
+  connections?: number[];
   enemyActed: boolean;
   actor: Actor;
   acted: Actor[];
@@ -69,11 +72,19 @@ export interface Battle {
 }
 export type Command = 'attack' | 'guard' | `item:${string}` | `skill:${string}`;
 export interface HPChange {
-  target: Actor | 'enemy';
+  target: Actor | 'enemy' | 'connection:0' | 'connection:1';
   amount: number;
   guarded?: boolean;
 }
+export interface BattlePhase {
+  kind: 'ally' | 'enemy' | 'support';
+  state: State;
+  battle: Battle;
+  hpChanges: HPChange[];
+  lines: string[];
+}
 export interface TurnResult {
+  phases?: BattlePhase[];
   hpChanges: HPChange[];
   lines: string[];
   victory: boolean;
@@ -85,6 +96,7 @@ export function beginBattle(s: State, id: EnemyId): Battle {
   resetBattleMP(s);
   return {
     id,
+    connections: enemies[id].connections?.map((c) => c.hp),
     enemyActed: false,
     actor: s.hp > 0 ? 'hero' : 'lilia',
     acted: [],
@@ -104,7 +116,7 @@ export function resolveTurn(
   s: State,
   b: Battle,
   cmd: Command,
-  target?: Actor,
+  target?: BattleTarget,
 ): TurnResult {
   if (s.chapter) return resolvePartyTurn(s, b, cmd, target);
   const e = enemies[b.id];
@@ -134,7 +146,23 @@ export function resolveTurn(
     r.used = false;
     return r;
   }
+  b.guards = cmd === 'guard' ? ['hero'] : [];
+  const capture = (
+    kind: BattlePhase['kind'],
+    fromHP: number,
+    fromLine: number,
+  ) => {
+    (r.phases ??= []).push({
+      kind,
+      state: structuredClone(s),
+      battle: structuredClone(b),
+      hpChanges: r.hpChanges.slice(fromHP),
+      lines: r.lines.slice(fromLine),
+    });
+  };
   const hit = () => {
+    const fromHP = r.hpChanges.length,
+      fromLine = r.lines.length;
     const damage = cmd === 'guard' ? Math.ceil(e.attack / 2) : e.attack;
     const before = s.hp;
     s.hp = Math.max(0, s.hp - damage);
@@ -144,8 +172,11 @@ export function resolveTurn(
       guarded: cmd === 'guard',
     });
     r.lines.push(`${e.name}の攻撃。ユウに ${damage} ダメージ。`);
+    capture('enemy', fromHP, fromLine);
   };
   const act = () => {
+    const fromHP = r.hpChanges.length,
+      fromLine = r.lines.length;
     if (cmd === 'attack') {
       const damage = s.starSword ? 42 : 24;
       const before = b.hp;
@@ -164,6 +195,7 @@ export function resolveTurn(
       b.hp = 0;
       r.lines.push(`${skill.name}――光の刃が黒い霧を切り裂く！`);
     }
+    capture('ally', fromHP, fromLine);
   };
   if (e.speed > 5) {
     hit();
@@ -185,6 +217,7 @@ export function resolveTurn(
         r.hpChanges.push({ target: 'hero', amount: n });
         b.liliaRestTurns = 1;
         r.lines.push(`リリアの手当て。HP が ${n} 回復。`);
+        capture('support', r.hpChanges.length - 1, r.lines.length - 1);
       }
     }
   }
@@ -200,7 +233,7 @@ export function validState(v: unknown): v is State {
     s.version === 1 &&
     Object.hasOwn(maps, s.map) &&
     Number.isFinite(s.x) &&
-    Math.abs(s.x) <= 8 &&
+    Math.abs(s.x) <= Math.max(8, mapHalfWidth(s.map)) &&
     Number.isFinite(s.z) &&
     Math.abs(s.z) <= maps[s.map].length / 2 &&
     Number.isInteger(s.hp) &&
@@ -250,15 +283,23 @@ export function save(s: State): boolean {
 
 function validChapter(s: State): boolean {
   if (s.chapter === undefined)
-    return !['village', 'belfry', 'undercroft', 'sanctum', 'road'].includes(
-      s.map,
-    );
+    return !!['entrance', 'depths', 'temple'].includes(s.map);
   const c = s.chapter;
   return (
     !!c &&
     typeof c === 'object' &&
-    [1, 2].includes(c.number) &&
+    [1, 2, 3].includes(c.number) &&
     [
+      'arrival',
+      'inquiry',
+      'rest',
+      'office',
+      'waterway',
+      'sever',
+      'core',
+      'shutdown',
+      'records',
+      'return',
       'opening',
       'investigation',
       'belfry',
@@ -277,8 +318,12 @@ function validChapter(s: State): boolean {
     s.lilia &&
     s.starSword &&
     (c.stage !== 'complete' ||
-      (c.number === 2 && s.flags.includes('ch01:complete'))) &&
-    (c.number !== 2 || c.stage === 'complete')
+      (c.number === 2 && s.flags.includes('ch01:complete')) ||
+      (c.number === 3 && s.flags.includes('ch02:complete'))) &&
+    (c.number !== 2 || s.flags.includes('ch01:complete')) &&
+    (c.number !== 3 ||
+      (c.stage === 'complete' && s.flags.includes('ch02:complete'))) &&
+    (!s.flags.includes('ch02:sever') || s.flags.includes('skill:star-sever'))
   );
 }
 export function actorHP(s: State, actor: Actor): number {

@@ -1,0 +1,27 @@
+{
+  "generator": "built-in image_gen",
+  "processor": "generate2dsprite; .venv/bin/python",
+  "assets": [
+    {
+      "name": "npcs",
+      "reference": "public/assets/chapter-01/keeper.png (style only)",
+      "prompt": "Create a production game sprite asset pack, exact 2x2 grid on solid #FF00FF background, no lines no labels. Match the detailed pixel art JRPG aesthetic of the supplied reference (only style reference). Four full-body 3/4 front view town NPCs at same camera distance and anatomical scale: top left Kai a young brown-haired male courier in teal vest with leather satchel; top right Toma his older brother a tired brown-haired warehouse worker in ochre rolled-sleeve workwear; bottom left Sena a female maintenance worker with tied dark hair, blue overalls and brass tools; bottom right royal facility manager middle-aged man in navy formal coat with brass trim, stern expression. Each character entirely within central 65% of their cell, stable feet line and generous magenta padding. No weapons, no effects, no shadows or text. One static pose each.",
+      "output": "public/assets/chapter-02/{kai,toma,sena,manager}.png"
+    },
+    {
+      "name": "collector",
+      "prompt": "Production detailed pixel art HD-2D JRPG boss idle spritesheet. Exact 2x2 equal square cells on solid #FF00FF, no grid lines text or shadows. SAME full mechanical memory collector in all four cells, slight in-place core pulsing idle animation. Brass and dark blue cylindrical armored machine, central cyan glass memory chamber with wisps of black mist inside, squat heavy mechanical legs, TWO distinct attached smaller cyan absorption cylinders left and right with brass hoses. 3/4 front view, sinister royal water purification machinery, ornate fantasy-industrial design. Full silhouette stays in central 65% each cell with generous magenta margins. Same scale and camera, feet and pelvis fixed; subtle core light changes only. No detached effects or crossed cell edges.",
+      "output": "public/assets/chapter-02/collector.png"
+    },
+    {
+      "name": "warehouse",
+      "prompt": "Single game map prop, detailed pixel art matching HD-2D fantasy JRPG. A trading-city canal warehouse building with pale stone lower floor, dark timber upper floor, red tile roof, teal cloth awnings, freight crates under an open loading arch, brass lanterns, a small royal crest plaque (no words). 3/4 orthographic front view, full building including roof and foundation visible, no ground plane no surrounding scenery, solid #FF00FF background, generous 15% padding all sides. Tall and wide architectural silhouette, elegant dusk palette, warm lit windows. One building only, not a grid.",
+      "output": "public/assets/chapter-02/warehouse.png"
+    },
+    {
+      "name": "work-machine",
+      "prompt": "Production HD-2D JRPG detailed pixel art game enemy spritesheet exact 2x2 square grid with 4 frame in-place idle loop of SAME mist-possessed maintenance machine. Solid #FF00FF background no text no borders. Small squat brass automaton, riveted steel body, a round blue glass sensor eye, two small wrench arms, four short mechanical legs, wisps of dark violet mist tightly attached. Full body centered in central 65% of each cell at constant scale with fixed feet, gentle sensor glow pulse and small arm vibration only. 3/4 front view. Nothing crossing cell edges, generous magenta margins.",
+      "output": "public/assets/chapter-02/work-machine.png"
+    }
+  ]
+}

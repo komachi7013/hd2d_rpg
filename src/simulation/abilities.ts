@@ -9,9 +9,18 @@ export interface SkillDefinition {
   actor: Actor;
   mpCost: number;
   conditions: { starSword: boolean; bossAwakened: boolean };
-  effect: { type: 'defeat-target' | 'restore-hp' | 'purify' };
+  effect: { type: 'defeat-target' | 'restore-hp' | 'purify' | 'sever' };
 }
 export const skills: readonly SkillDefinition[] = [
+  {
+    id: 'star-sever',
+    name: '星断ち',
+    actor: 'hero',
+    mpCost: 6,
+    description: '敵一体に32ダメージ。吸収器の接続を断つ。',
+    conditions: { starSword: true, bossAwakened: false },
+    effect: { type: 'sever' },
+  },
   {
     id: 'star-slash',
     name: '一閃',

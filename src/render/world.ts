@@ -1,3 +1,18 @@
+import {
+  isTown,
+  mapHalfWidth,
+  intersects,
+  npcPatrol,
+  EncounterMovement,
+  type Footprint,
+} from '../simulation/exploration';
+import {
+  townBuildings,
+  townCrossroads,
+  riverX,
+  bridgeZ,
+  riverBlocked,
+} from './town-layout';
 import * as T from 'three';
 import { maps, enemies, type MapId, type EnemyId } from '../simulation/data';
 import type { State, Battle, Actor } from '../simulation/state';
@@ -25,11 +40,17 @@ export class World {
   actionUntil = 0;
   fx: T.Sprite;
   time = 0;
-  obstacles: {
-    x: number;
-    z: number;
-    r: number;
-  }[] = [];
+  obstacles: Footprint[] = [];
+  npcs = new Map<string, T.Sprite>();
+  encounterMovement = new EncounterMovement();
+  enemyActionStarted = 0;
+  enemyActionUntil = 0;
+  enemyTargets: string[] = [];
+  actionStarted = 0;
+  get animationTime() {
+    return performance.now() / 1000;
+  }
+
   placement = new PartyPlacement();
   awakeningEffects = new AwakeningEffects();
   cinematicPhase = 0;
@@ -78,6 +99,26 @@ export class World {
   async load() {
     const loader = new T.TextureLoader();
     const specs: Record<string, string> = {
+      townShop: 'revision/town-shop.png',
+      townHouse: 'revision/town-house.png',
+      townManor: 'revision/town-manor.png',
+      river: 'revision/river.png',
+      bridge: 'revision/bridge.png',
+      liliaAttack: 'revision/lilia-attack.png',
+      npcKai: 'revision/npc-kai.png',
+      npcToma: 'revision/npc-toma.png',
+      npcSena: 'revision/npc-sena.png',
+      npcManager: 'revision/npc-manager.png',
+      npcElder: 'revision/npc-elder.png',
+      npcAdult: 'revision/npc-adult.png',
+      npcChild: 'revision/npc-child.png',
+      kai: 'chapter-02/kai.png',
+      toma: 'chapter-02/toma.png',
+      sena: 'chapter-02/sena.png',
+      manager: 'chapter-02/manager.png',
+      collector: 'chapter-02/collector.png',
+      workMachine: 'chapter-02/work-machine.png',
+      warehouse: 'chapter-02/warehouse.png',
       keeper: 'chapter-01/keeper.png',
       bellKeeper: 'chapter-01/bell-keeper.png',
       villagerAdult: 'chapter-01/villager-adult.png',
@@ -139,6 +180,7 @@ export class World {
     cols: number,
     rows: number,
   ) {
+    sprite.center.set(0.5, id === 'liliaAttack' ? 0.05 : 0.07);
     const master = this.textures.get(id);
     if (!master) return;
     let tex = sprite.material.map;
@@ -191,13 +233,16 @@ export class World {
     this.release(this.environment);
     this.release(this.battleStage);
     this.obstacles = [];
+    this.npcs.clear();
+    this.encounterMovement.reset(map);
+    this.enemyActionUntil = 0;
     this.enemySprites.forEach((s) => {
       this.actors.remove(s);
       s.material.map?.dispose();
       s.material.dispose();
     });
     this.enemySprites.clear();
-    if (['village', 'belfry', 'undercroft', 'sanctum', 'road'].includes(map)) {
+    if (!['entrance', 'depths', 'temple'].includes(map)) {
       this.buildChapter(map);
       return;
     }
@@ -270,6 +315,7 @@ export class World {
         tree.material.depthWrite = true;
         this.frame(tree, 'tree', 0, 1, 1);
         this.environment.add(tree);
+        this.obstacles.push({ x, z, r: 0.75 });
         if (i % 3 === 0)
           this.mesh(
             new T.CylinderGeometry(0.28, 0.6, h * 0.5, 6),
@@ -299,6 +345,7 @@ export class World {
         fern.position.set(x, 0, z);
         this.frame(fern, 'props', i % 4 === 0 ? 4 : 3, 3, 3);
         this.environment.add(fern);
+        this.obstacles.push({ x, z, r: 0.45 });
       }
     } else {
       for (let z = -30; z <= 30; z += 8) {
@@ -360,7 +407,10 @@ export class World {
         if (landmark.id === 'altar') sprite.position.y = 1.2;
       } else if (landmark.id === 'mural') {
         sprite.visible = false;
-      } else this.frame(sprite, 'props', index, 3, 3);
+      } else {
+        this.frame(sprite, 'props', index, 3, 3);
+        this.obstacles.push({ x: landmark.x, z: landmark.z, r: 0.5 });
+      }
     }
     if (temple) {
       const relief = new T.Mesh(
@@ -459,12 +509,16 @@ export class World {
     sprite.position.set(x, 0.06, z);
     this.frame(sprite, asset, frame, cols, rows);
     this.environment.add(sprite);
+    if (asset === 'props') this.obstacles.push({ x, z, r: 0.5 });
+    if (asset === 'tree') this.obstacles.push({ x, z, r: 0.7 });
     return sprite;
   }
   buildChapter(map: MapId) {
-    const outside = map === 'village' || map === 'road';
+    const outside = ['village', 'road', 'merca', 'north-road'].includes(map);
+    const city = map === 'merca';
+    const room = map === 'merca-depot' || map === 'merca-office';
     const len = maps[map].length;
-    const bg = outside ? 0x849e97 : 0x15242f;
+    const bg = city ? 0x927568 : outside ? 0x849e97 : 0x15242f;
     this.scene.fog = new T.FogExp2(bg, outside ? 0.013 : 0.024);
     this.renderer.setClearColor(bg);
     const floor = this.box(
@@ -499,7 +553,7 @@ export class World {
         (path.material as T.MeshStandardMaterial).map = texture;
         (path.material as T.MeshStandardMaterial).color.set(0xd2c6ad);
       }
-      if (!outside) {
+      if (!outside && !room) {
         for (const x of [-6.4, 6.4])
           this.box(1.3, 1.1, 2.05, 0x304f59, x, 0.1, z);
         const ward = this.box(0.11, 0.03, 2.05, 0x437b88, -3.2, 0.1, z);
@@ -508,20 +562,18 @@ export class World {
         mist.userData.ward = 'mist';
       }
     }
-    if (map === 'village') {
-      for (const z of [18, 5, -8]) {
-        for (const side of [-1, 1]) {
-          const cottage = this.decor('cottage', 10, side * 10, z);
-          cottage.material.depthWrite = true;
-          this.decor('props', 1.8, side * 5.8, z + 3, 3, 3, 3);
-        }
+    if (room) {
+      for (const z of [-7, 4]) {
+        this.decor('props', 2.5, -4, z, 3, 3, 3);
+        this.decor('props', 2, 4, z, 1, 3, 3);
+        const light = new T.PointLight(0xffc88f, 24, 17);
+        light.position.set(0, 3, z);
+        this.environment.add(light);
       }
-      const tower = this.decor('tower', 19, 0, -29);
-      tower.material.depthWrite = true;
-      this.decor('props', 2.4, 4, 16, 5, 3, 3);
-      for (const z of [-17, -3, 11, 24])
-        for (const x of [-17, 17]) this.decor('tree', 9, x, z);
-    } else if (map === 'road') {
+    }
+    if (isTown(map)) {
+      this.buildTownEnvironment(map);
+    } else if (map === 'road' || map === 'north-road') {
       for (let z = -20; z <= 20; z += 7)
         for (const x of [-9, 11]) this.decor('tree', 8, x, z);
     } else {
@@ -554,24 +606,33 @@ export class World {
       }
     }
     for (const p of maps[map].landmarks) {
-      if (['keeper', 'elder', 'baker', 'child'].includes(p.id)) {
-        const assets: Record<string, string> = {
-          keeper: 'bellKeeper',
-          elder: 'keeper',
-          baker: 'villagerAdult',
-          child: 'villagerChild',
-        };
+      const npcAssets: Record<string, string> = {
+        kai: 'npcKai',
+        toma: 'npcToma',
+        sena: 'npcSena',
+        manager: 'npcManager',
+        merchant: 'npcAdult',
+        craftsman: 'npcElder',
+        family: 'npcChild',
+        keeper: 'npcElder',
+        elder: 'npcElder',
+        baker: 'npcAdult',
+        child: 'npcChild',
+      };
+      if (npcAssets[p.id]) {
         const npc = this.decor(
-          assets[p.id],
-          p.id === 'child' ? 2.5 : 3.4,
+          npcAssets[p.id],
+          ['child', 'family'].includes(p.id) ? 2.5 : 3.4,
           p.x,
           p.z,
           0,
-          2,
-          2,
+          4,
+          4,
         );
-        npc.userData.npcIdle = assets[p.id];
-        npc.userData.npcRole = p.id;
+        npc.userData.npcAsset = npcAssets[p.id];
+        npc.userData.home = { x: p.x, z: p.z };
+        npc.userData.clock = 0;
+        this.npcs.set(p.id, npc);
       } else
         this.decor(
           'props',
@@ -586,7 +647,7 @@ export class World {
     for (const e of maps[map].encounters) {
       const sprite = this.actor(
         enemies[e.id].art,
-        e.id === 'bellkeeper' ? 6.7 : 2.8,
+        e.id === 'ch02-collector' ? 7 : e.id === 'bellkeeper' ? 6.7 : 2.8,
       );
       sprite.position.set(e.x, 0.1, e.z);
       this.enemySprites.set(e.id, sprite);
@@ -616,12 +677,157 @@ export class World {
     this.cameraTarget.set(0, 0, maps[map].spawn[1]);
   }
 
-  walkable(x: number, z: number) {
-    return (
-      Math.abs(x) < 5 &&
-      Math.abs(z) < maps[this.map!].length / 2 - 1 &&
-      !this.obstacles.some((o) => Math.hypot(o.x - x, o.z - z) < o.r + 0.3)
+  buildTownEnvironment(map: MapId) {
+    const len = maps[map].length;
+    const pave = (w: number, d: number, x: number, z: number) => {
+      const road = this.box(w, 0.14, d, 0xffffff, x, 0.05, z);
+      const tex = this.textures.get('path')!.clone();
+      tex.wrapS = tex.wrapT = T.RepeatWrapping;
+      tex.repeat.set(w / 3, d / 3);
+      (road.material as T.MeshStandardMaterial).map = tex;
+      (road.material as T.MeshStandardMaterial).color.set(0xd7c7a6);
+    };
+    for (const z of townCrossroads) pave(36, 3.5, 0, z);
+    pave(2, len - 4, 17, 0);
+    pave(2, len - 4, -17, 0);
+    // A meeting square connects the market and residential lanes.
+    pave(10, 8, 0, 10);
+    for (const house of townBuildings(map)) {
+      this.decor(
+        house.asset,
+        house.size,
+        house.x,
+        house.z,
+      ).material.depthWrite = true;
+      this.obstacles.push({
+        x: house.x,
+        z: house.z,
+        halfX: house.halfX,
+        halfZ: house.halfZ,
+      });
+    }
+    for (const z of [22, 7, -8, -21]) {
+      this.decor('props', 1.7, 4.6, z, 3, 3, 3);
+      this.decor('props', 1.6, 15, z, 1, 3, 3);
+    }
+    if (map === 'merca') {
+      const river = new T.Mesh(
+        new T.PlaneGeometry(4, len + 4),
+        new T.MeshBasicMaterial({ map: this.textures.get('river')!.clone() }),
+      );
+      river.rotation.x = -Math.PI / 2;
+      river.position.set(riverX, 0.24, 0);
+      river.userData.river = true;
+      river.material.map!.wrapS = river.material.map!.wrapT = T.RepeatWrapping;
+      river.material.map!.repeat.set(1, (len + 4) / 4);
+      this.environment.add(river);
+      for (const z of bridgeZ) {
+        const bridge = new T.Mesh(
+          new T.PlaneGeometry(6.4, 9.5),
+          new T.MeshBasicMaterial({
+            map: this.textures.get('bridge')!,
+            transparent: true,
+            alphaTest: 0.1,
+            depthWrite: true,
+          }),
+        );
+        bridge.rotation.x = -Math.PI / 2;
+        bridge.position.set(riverX, 0.3, z);
+        this.environment.add(bridge);
+      }
+    } else {
+      this.decor('tower', 17, 0, -30).material.depthWrite = true;
+    }
+  }
+  landmarkPosition(id: string, fallback: { x: number; z: number }) {
+    const npc = this.npcs.get(id);
+    return npc ? { x: npc.position.x, z: npc.position.z } : fallback;
+  }
+  walkable(x: number, z: number, fromX?: number, fromZ?: number) {
+    if (
+      Math.abs(x) >= mapHalfWidth(this.map!) ||
+      Math.abs(z) >= maps[this.map!].length / 2 - 1 ||
+      riverBlocked(this.map!, x, z)
+    )
+      return false;
+    const shapes = [
+      ...this.obstacles,
+      ...[...this.npcs.values()].map((n) => ({
+        x: n.position.x,
+        z: n.position.z,
+        r: 0.6,
+      })),
+    ];
+    return !shapes.some((shape) => {
+      if (!intersects(x, z, shape)) return false;
+      // An older save may be inside a newly added prop: allow leaving it.
+      if (
+        fromX !== undefined &&
+        fromZ !== undefined &&
+        intersects(fromX, fromZ, shape)
+      )
+        return (
+          Math.hypot(x - shape.x, z - shape.z) <=
+          Math.hypot(fromX - shape.x, fromZ - shape.z)
+        );
+      return true;
+    });
+  }
+  updateExploration(s: State, dt: number) {
+    for (const npc of this.npcs.values()) {
+      const clock = npc.userData.clock + dt,
+        motion = npcPatrol(clock),
+        home = npc.userData.home;
+      const x = home.x + motion.offset,
+        z = home.z;
+      const blocked =
+        Math.hypot(x - s.x, z - s.z) < 0.9 ||
+        this.obstacles.some((shape) => intersects(x, z, shape, 0.6)) ||
+        [...this.npcs.values()].some(
+          (other) =>
+            other !== npc &&
+            Math.hypot(x - other.position.x, z - other.position.z) < 1.2,
+        );
+      if (!blocked) {
+        npc.userData.clock = clock;
+        npc.position.x = x;
+      }
+      const pose = npcPatrol(npc.userData.clock);
+      // Side walks share the accepted right profile and mirror for left.
+      npc.scale.x = Math.abs(npc.scale.x) * (pose.direction === 1 ? -1 : 1);
+      const direction = pose.direction === 1 ? 2 : pose.direction;
+      this.frame(
+        npc,
+        npc.userData.npcAsset,
+        direction * 4 +
+          (pose.moving ? Math.floor(npc.userData.clock * 6) % 4 : 0),
+        4,
+        4,
+      );
+    }
+    this.encounterMovement.update(s.map, s.x, s.z, dt, s.defeated, (x, z) =>
+      this.walkable(x, z),
     );
+  }
+  playEnemyAttack(targets: string[]) {
+    this.enemyActionStarted = this.animationTime;
+    this.enemyActionUntil = this.animationTime + 0.95;
+    this.enemyTargets = targets;
+    this.actionUntil = 0;
+  }
+  reactToDamage(changes: import('../simulation/state').HPChange[]) {
+    for (const c of changes)
+      if (c.amount < 0) {
+        const sprite =
+          c.target === 'hero'
+            ? this.player
+            : c.target === 'lilia'
+              ? this.companion
+              : [...this.enemySprites.values()].find(
+                  (sprite) => sprite.visible,
+                );
+        if (sprite) sprite.userData.hurtUntil = this.animationTime + 0.32;
+      }
   }
   play(
     action: string,
@@ -633,17 +839,23 @@ export class World {
     this.effectTarget = target;
     this.action = action;
     this.guardUntil[actor] = action === 'guard' ? this.time + duration : 0;
-    this.actionUntil = this.time + duration;
+    this.actionStarted = this.animationTime;
+    this.actionUntil = this.animationTime + duration;
+    this.enemyActionUntil = 0;
   }
   render(s: State, b: Battle | null, dt: number, mode: string) {
     this.time += dt;
     if (this.map !== s.map) this.build(s.map);
     this.environment.children.forEach((o) => {
-      if (o instanceof T.Sprite && o.userData.npcIdle)
-        this.frame(o, o.userData.npcIdle, Math.floor(this.time * 3) % 4, 2, 2);
+      if (o.userData.river && o instanceof T.Mesh)
+        (o.material as T.MeshBasicMaterial).map!.offset.y = this.time * 0.018;
       if (o.userData.ward && o instanceof T.Mesh) {
         (o.material as T.MeshStandardMaterial).color.set(
-          s.flags.includes('ch01:restored')
+          (
+            s.map.startsWith('merca')
+              ? s.flags.includes('ch02:shutdown')
+              : s.flags.includes('ch01:restored')
+          )
             ? 0x6ddccb
             : o.userData.ward === 'mist'
               ? 0x443453
@@ -656,6 +868,15 @@ export class World {
     const inBattle =
       !!b && ['battle', 'turn', 'defeat', 'dialogue'].includes(mode);
     const pose = this.placement.update(s, inBattle, dt);
+    if (!inBattle && s.map === 'merca') {
+      const height = (p: { x: number; z: number }) =>
+        Math.abs(p.x - riverX) < 3.3 &&
+        bridgeZ.some((z) => Math.abs(p.z - z) < 1.65)
+          ? 0.55
+          : 0.05;
+      pose.player.y = height(pose.player);
+      pose.companion.y = height(pose.companion);
+    }
     this.environment.visible = !inBattle;
     this.battleStage.visible = inBattle;
     this.player.position.set(pose.player.x, pose.player.y, pose.player.z);
@@ -702,12 +923,18 @@ export class World {
         2,
       );
     } else if (
-      this.time < this.actionUntil &&
+      this.animationTime < this.actionUntil &&
       this.action !== 'guard' &&
       this.action !== 'heal' &&
       this.actingActor === 'hero'
     ) {
-      this.frame(this.player, this.action, Math.floor(this.time * 9) % 4, 2, 2);
+      this.frame(
+        this.player,
+        this.action,
+        Math.min(3, Math.floor((this.animationTime - this.actionStarted) * 5)),
+        2,
+        2,
+      );
     } else {
       this.frame(
         this.player,
@@ -726,14 +953,32 @@ export class World {
         2,
         2,
       );
-    else if (this.time < this.actionUntil && this.action === 'heal')
+    else if (
+      this.animationTime < this.actionUntil &&
+      this.actingActor === 'lilia' &&
+      this.action === 'attack'
+    )
+      this.frame(
+        this.companion,
+        'liliaAttack',
+        Math.min(3, Math.floor((this.animationTime - this.actionStarted) * 5)),
+        2,
+        2,
+      );
+    else if (
+      this.animationTime < this.actionUntil &&
+      this.actingActor === 'lilia' &&
+      this.action === 'heal'
+    )
       this.frame(this.companion, 'heal', Math.floor(this.time * 7) % 4, 2, 2);
     else
       this.frame(
         this.companion,
         'lilia',
-        (inBattle ? 2 : this.direction) * 4 +
-          (this.moving && !inBattle ? Math.floor(this.time * 7) % 4 : 0),
+        (inBattle ? 2 : pose.companionDirection) * 4 +
+          (pose.companionMoving && !inBattle
+            ? Math.floor(this.time * 7) % 4
+            : 0),
         4,
         4,
       );
@@ -742,7 +987,8 @@ export class World {
       if (inBattle && id === b!.id) sprite.position.set(3, 0, 0);
       else {
         const p = maps[s.map].encounters.find((e) => e.id === id)!;
-        sprite.position.set(p.x, 0.05, p.z);
+        const position = this.encounterMovement.positions.get(id) ?? p;
+        sprite.position.set(position.x, 0.05, position.z);
       }
       if (id === 'bellkeeper') {
         const rescued = s.flags.includes('ch01:boss');
@@ -765,14 +1011,39 @@ export class World {
     });
     if (
       inBattle &&
-      this.time < this.actionUntil &&
+      this.animationTime < this.actionUntil &&
       this.actingActor === 'lilia' &&
       this.action === 'attack'
     )
       this.companion.position.x +=
-        Math.sin(((this.actionUntil - this.time) / 1.1) * Math.PI) * 0.65;
+        Math.sin(
+          Math.min(1, (this.animationTime - this.actionStarted) / 0.9) *
+            Math.PI,
+        ) * 0.9;
+    if (inBattle && this.animationTime < this.enemyActionUntil) {
+      const enemy = this.enemySprites.get(b!.id)!;
+      const progress = Math.min(
+        1,
+        (this.animationTime - this.enemyActionStarted) / 0.95,
+      );
+      const pulse = Math.sin(progress * Math.PI);
+      enemy.position.x -=
+        pulse * (b!.id === 'moth1' || b!.id === 'moth2' ? 2.3 : 1.8);
+      enemy.position.y += pulse * (enemies[b!.id].art === 'moth' ? 0.8 : 0.25);
+      enemy.material.rotation = Math.sin(progress * Math.PI * 2) * 0.12;
+    } else this.enemySprites.forEach((enemy) => (enemy.material.rotation = 0));
+    for (const actor of [
+      this.player,
+      this.companion,
+      ...this.enemySprites.values(),
+    ])
+      actor.material.color.set(
+        this.animationTime < (actor.userData.hurtUntil ?? 0)
+          ? 0xff9c95
+          : 0xffffff,
+      );
     this.fx.visible =
-      (this.time < this.actionUntil &&
+      (this.animationTime < this.actionUntil &&
         (this.action === 'star' || this.action === 'heal')) ||
       glow.phase === 'awakening';
     if (this.fx.visible) {

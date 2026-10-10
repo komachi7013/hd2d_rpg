@@ -1,9 +1,20 @@
+import { secondObjective } from './chapter-two';
 import { maps, type MapId } from './data';
 import { learnSkill } from './abilities';
 import type { State } from './state';
 import { ensureParty, type PartyProgress } from './progression';
 
 export type ChapterStage =
+  | 'arrival'
+  | 'inquiry'
+  | 'rest'
+  | 'office'
+  | 'waterway'
+  | 'sever'
+  | 'core'
+  | 'shutdown'
+  | 'records'
+  | 'return'
   | 'opening'
   | 'investigation'
   | 'belfry'
@@ -12,7 +23,7 @@ export type ChapterStage =
   | 'departure'
   | 'complete';
 export interface ChapterProgress {
-  number: 1 | 2;
+  number: 1 | 2 | 3;
   stage: ChapterStage;
   titleShown: boolean;
   liliaHP: number;
@@ -87,6 +98,7 @@ export function depart(state: State): void {
 }
 export function chapterObjective(state: State): string {
   if (!state.chapter) return '';
+  if (state.flags.includes('ch02:started')) return secondObjective(state);
   if (state.chapter.stage === 'complete')
     return '第一章完了 · 街道の先には交易都市';
   if (state.chapter.stage === 'opening')

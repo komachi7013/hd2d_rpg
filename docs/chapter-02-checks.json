@@ -1,0 +1,71 @@
+{
+  "passed": true,
+  "severed": 2,
+  "prayed": true,
+  "optionalBattlesSkipped": true,
+  "herbs": 0,
+  "finalState": {
+    "version": 1,
+    "map": "north-road",
+    "x": 0,
+    "z": 10,
+    "hp": 136,
+    "herbs": 0,
+    "lilia": true,
+    "sword": true,
+    "starSword": true,
+    "complete": true,
+    "defeated": [
+      "boss",
+      "bellkeeper",
+      "ch02-collector"
+    ],
+    "flags": [
+      "ch01:complete",
+      "ch01:title",
+      "ch01:emblem",
+      "ch01:restored",
+      "ch01:return",
+      "skill:star-slash",
+      "skill:recovery",
+      "skill:prayer",
+      "ch02:started",
+      "ch02:title",
+      "ch02:arrival",
+      "ch02:manifest",
+      "ch02:rest-entry",
+      "ch02:office",
+      "ch02:flow",
+      "skill:star-sever",
+      "ch02:sever",
+      "ch02:core",
+      "xp:ch02-collector",
+      "ch02:boss",
+      "ch02:rescue",
+      "ch02:shutdown",
+      "ch02:records",
+      "ch02:return",
+      "ch02:rest-exit",
+      "ch02:complete"
+    ],
+    "chapter": {
+      "number": 3,
+      "stage": "complete",
+      "titleShown": true,
+      "liliaHP": 130,
+      "party": {
+        "hero": {
+          "level": 4,
+          "xp": 10,
+          "mp": 36
+        },
+        "lilia": {
+          "level": 4,
+          "xp": 10,
+          "mp": 39
+        }
+      }
+    }
+  },
+  "errors": []
+}

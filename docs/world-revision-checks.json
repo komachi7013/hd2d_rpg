@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "errors": [],
+  "tests": [
+    "town roads and bridge",
+    "river collision",
+    "NPC patrol",
+    "forest pursuit",
+    "following alignment",
+    "sequential ally/enemy damage",
+    "Lilia staff animation",
+    "guard, armor, forgotten and warning icons"
+  ]
+}
