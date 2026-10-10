@@ -1,3 +1,13 @@
+import { battleStatuses, statusMarkup } from './ui/status-icons';
+import { CombatPlayback } from './render/combat-playback';
+import {
+  beginSecondChapter,
+  secondTitle,
+  secondEvent,
+  finishSecondEvent,
+  collectorVictory,
+  departSecondChapter,
+} from './simulation/chapter-two';
 import './ui/styles.css';
 import { World } from './render/world';
 import { AudioEngine } from './audio';
@@ -15,6 +25,7 @@ import {
   type Battle,
   type Command,
   type Actor,
+  type BattleTarget,
   type HPChange,
   actorHP,
   healActor,
@@ -61,6 +72,18 @@ const combatOverlay = document.createElement('div');
 combatOverlay.id = 'combat-overlay';
 combatOverlay.setAttribute('aria-hidden', 'true');
 document.body.append(combatOverlay);
+const statusOverlay = document.createElement('div');
+statusOverlay.id = 'battle-status-icons';
+document.body.append(statusOverlay);
+const statusGroups = new Map<string, HTMLDivElement>();
+for (const actor of ['hero', 'lilia', 'enemy']) {
+  const node = document.createElement('div');
+  node.className = 'status-icons';
+  node.dataset.actor = actor;
+  statusOverlay.append(node);
+  statusGroups.set(actor, node);
+}
+
 let combatNumbers: {
   node: HTMLElement;
   change: HPChange;
@@ -81,7 +104,7 @@ function displayHPChanges(changes: HPChange[]) {
     const slot = slots.get(change.target) ?? 0;
     slots.set(change.target, slot + 1);
     combatNumbers.push({ node, change, started: performance.now(), slot });
-    if (change.target !== 'enemy') {
+    if (change.target === 'hero' || change.target === 'lilia') {
       recentHP.set(change.target, {
         amount: change.amount,
         until: performance.now() + 1500,
@@ -91,6 +114,7 @@ function displayHPChanges(changes: HPChange[]) {
   }
 }
 function resetCombatFeedback() {
+  turnPlayback = null;
   combatNumbers.forEach((entry) => entry.node.remove());
   combatNumbers = [];
   recentHP.clear();
@@ -99,9 +123,9 @@ let world: World;
 let state: State = fresh();
 let battle: Battle | null = null;
 let mode = 'loading';
-let battleMenu: 'root' | 'skills' | 'items' | 'targets' = 'root';
+let battleMenu: 'root' | 'skills' | 'items' | 'targets' | 'enemies' = 'root';
 let targetCommand: Command | null = null;
-let targetOrigin: 'skills' | 'items' = 'skills';
+let targetOrigin: 'root' | 'skills' | 'items' = 'skills';
 let titleStarted = 0;
 let activeChapterTitle = chapterTitle;
 let afterChapterTitle = () => {};
@@ -112,6 +136,8 @@ let line = 0;
 let dialogueId = '';
 let afterDialogue = () => {};
 let turnAfter = () => {};
+let turnPlayback: CombatPlayback | null = null;
+let battlePhaseKind: 'ally' | 'enemy' | 'support' = 'ally';
 let turnText = '';
 let toast = '';
 let toastUntil = 0;
@@ -187,7 +213,7 @@ function draw(focusAction?: string) {
   if (mode === 'chapterTitle')
     html = `<section class="chapter-title"><div class="chapter-title-copy"><p>${activeChapterTitle.number}</p><h1>${activeChapterTitle.title}</h1></div><small>Enter / Z　進む</small></section>`;
   if (mode === 'title') {
-    html = `<section class="title"><div class="title-content"><div class="eyebrow">A TALE OF THE LOST STARS</div><h1>星剣の目覚め</h1><p class="subtitle">PROLOGUE / CHAPTER I · 失われた記憶の旅</p><div class="rule"></div><div class="choices">${btn('はじめから', 'new')}${btn('つづきから', 'continue', !saved.state)}${btn('設定', 'settings')}</div>${saved.error ? `<p>${saved.error}</p>` : ''}</div><div class="title-foot">↑ ↓ 選択　Enter / Z 決定　·　PC キーボード対応</div></section>`;
+    html = `<section class="title"><div class="title-content"><div class="eyebrow">A TALE OF THE LOST STARS</div><h1>星剣の目覚め</h1><p class="subtitle">PROLOGUE / CHAPTER I / II · 失われた記憶の旅</p><div class="rule"></div><div class="choices">${btn('はじめから', 'new')}${btn('つづきから', 'continue', !saved.state)}${btn('設定', 'settings')}</div>${saved.error ? `<p>${saved.error}</p>` : ''}</div><div class="title-foot">↑ ↓ 選択　Enter / Z 決定　·　PC キーボード対応</div></section>`;
   }
   if (
     ['explore', 'dialogue', 'battle', 'turn', 'menu', 'defeat'].includes(mode)
@@ -235,6 +261,23 @@ function draw(focusAction?: string) {
       guidance = learned.length
         ? `${actor === 'lilia' ? '魔法' : '星剣'}の技能を選択してください。Esc / X で戻る。`
         : '習得済みの技能はありません。';
+    } else if (battleMenu === 'enemies') {
+      options =
+        btn(
+          `本体<small>HP ${battle.hp} / ${enemies[battle.id].hp}${battle.connections?.some((hp) => hp > 0) ? ' · 障壁50%' : ' · 障壁解除'}</small>`,
+          'enemy:body',
+        ) +
+        battle
+          .connections!.map((hp, i) =>
+            btn(
+              `${enemies[battle!.id].connections![i].name}<small>HP ${hp} / ${enemies[battle!.id].connections![i].hp}${hp === 0 ? ' · 接続解除' : ''}</small>`,
+              `enemy:connection:${i}`,
+              hp === 0,
+            ),
+          )
+          .join('') +
+        btn('戻る', 'battleBack');
+      guidance = '対象を一つ選択。星断ちで吸収器の接続を解除。Esc / Xで戻る。';
     } else if (battleMenu === 'targets') {
       options =
         (['hero', 'lilia'] as Actor[])
@@ -270,7 +313,7 @@ function draw(focusAction?: string) {
         ? '道具を選択してください。Esc / X で戻る。'
         : '所持している道具はありません。Esc / X で戻る。';
     }
-    html += `<div class="battle-label${state.chapter ? ' chapter-battle-label' : ''}">${enemies[battle.id].name}<small>HP ${battle.hp} / ${enemies[battle.id].hp}${state.chapter && battle.id === 'bellkeeper' ? (battle.armor ? ' · 霧の鎧' : ' · 鎧解除中') : ''}</small></div><div class="battle-ui"><div class="commands" data-menu="${battleMenu}">${options}</div><div class="battle-log"><small>TURN ${battle.turn + (mode === 'battle' ? 1 : 0)} · ${state.chapter ? `${actorName(actor)}の行動${battle.forgotten.hero ? ' · ユウ：忘却' : ''}${battle.forgotten.lilia ? ' · リリア：忘却' : ''}${state.hp === 0 ? ' · ユウ：戦闘不能' : ''}${state.chapter.liliaHP === 0 ? ' · リリア：戦闘不能' : ''}` : state.lilia ? (battle.liliaRestTurns > 0 ? (mode === 'turn' ? 'リリア：次のターンは休み' : 'リリア：このターンは休み') : 'リリアが同行中') : 'ユウは一人で戦っている'}</small>${mode === 'turn' ? turnText : guidance} ${mode === 'turn' ? '<span class="next">Enter / Z　次へ ▼</span>' : ''}</div></div>`;
+    html += `<div class="battle-label${state.chapter ? ' chapter-battle-label' : ''}">${enemies[battle.id].name}<small>HP ${battle.hp} / ${enemies[battle.id].hp}${battle.connections ? `<span class="connections">${battle.connections.map((hp, i) => `${enemies[battle!.id].connections![i].name} HP ${hp} / ${enemies[battle!.id].connections![i].hp} · ${hp ? '接続中' : '停止'}`).join('<br>')}<br>${battle.connections.some((hp) => hp > 0) ? '本体障壁：50%軽減' : '本体障壁：解除'}</span>` : ''}${state.chapter && battle.id === 'bellkeeper' ? (battle.armor ? ' · 霧の鎧' : ' · 鎧解除中') : ''}</small></div><div class="battle-ui"><div class="commands" data-menu="${battleMenu}">${options}</div><div class="battle-log"><small>TURN ${battle.turn + (mode === 'battle' || turnPlayback ? 1 : 0)} · ${state.chapter ? `${turnPlayback && battlePhaseKind === 'enemy' ? enemies[battle.id].name : actorName(actor)}の行動${battle.forgotten.hero ? ' · ユウ：忘却' : ''}${battle.forgotten.lilia ? ' · リリア：忘却' : ''}${state.hp === 0 ? ' · ユウ：戦闘不能' : ''}${state.chapter.liliaHP === 0 ? ' · リリア：戦闘不能' : ''}` : state.lilia ? (battle.liliaRestTurns > 0 ? (mode === 'turn' ? 'リリア：次のターンは休み' : 'リリア：このターンは休み') : 'リリアが同行中') : 'ユウは一人で戦っている'}</small>${mode === 'turn' ? turnText : guidance} ${mode === 'turn' ? `<span class="next" data-animating="${!!turnPlayback}">${turnPlayback ? '演出中…' : 'Enter / Z　次へ ▼'}</span>` : ''}</div></div>`;
   }
   if (mode === 'menu')
     html += `<div class="modal"><section class="card"><div class="eyebrow">TRAVEL JOURNAL</div><h2>旅の記録</h2><p>${objective()}<br>${state.chapter ? 'リリアが戦闘仲間として同行。魔法で一人を回復、祈りで忘却を解除。' : state.lilia ? 'リリアが同行。HP が半分以下で手当て。手当ての次のターンは休み。' : 'まだ同行者はいない。'}<br>武器：${state.starSword ? '星剣' : state.sword ? '拾った剣' : 'なし'}</p><div class="choices">${btn(`薬草を使う · ${state.herbs}個`, 'fieldHerb', !state.herbs)}${state.chapter ? `${fieldMagicButton('回復 → ユウ', 'fieldHeal:hero', 'hero', 'recovery')}${fieldMagicButton('回復 → リリア', 'fieldHeal:lilia', 'lilia', 'recovery')}${state.flags.includes('skill:prayer') ? `${fieldMagicButton('祈り → ユウ', 'fieldPrayer:hero', 'hero', 'prayer')}${fieldMagicButton('祈り → リリア', 'fieldPrayer:lilia', 'lilia', 'prayer')}` : ''}${btn(`薬草 → リリア · ${state.herbs}個`, 'fieldHerbLilia', !state.herbs || state.chapter.liliaHP <= 0 || state.chapter.liliaHP >= actorMaxHP(state, 'lilia'))}` : ''}${btn('設定', 'settings')}${btn('タイトルへ', 'title')}${btn('探索に戻る', 'close')}</div></section></div>`;
@@ -399,6 +442,10 @@ function victory() {
       checkpoint();
       draw();
     });
+  } else if (id === 'ch02-collector') {
+    collectorVictory(state);
+    checkpoint();
+    resumeChapter();
   } else if (id === 'bellkeeper') {
     rescueSpirit(state);
     checkpoint();
@@ -409,9 +456,11 @@ function victory() {
     draw();
   }
 }
-function command(cmd: Command, target?: Actor) {
+function command(cmd: Command, target?: BattleTarget) {
   if (!battle || mode !== 'battle') return;
   const actingActor = state.chapter ? battle.actor : 'hero';
+  const beforeState = structuredClone(state),
+    beforeBattle = structuredClone(battle);
   const result = resolveTurn(state, battle, cmd, target);
   if (!result.used) {
     message(result.lines.join(' '));
@@ -425,39 +474,89 @@ function command(cmd: Command, target?: Actor) {
       if (gain) result.hpChanges.push({ target: actor, amount: gain });
     }
   }
-  displayHPChanges(result.hpChanges);
-  audio.fx(
-    cmd.startsWith('item:') ||
-      cmd === 'skill:recovery' ||
-      cmd === 'skill:prayer'
-      ? 'heal'
-      : cmd.startsWith('skill:')
-        ? 'star'
-        : cmd === 'attack'
-          ? 'attack'
-          : 'confirm',
-  );
-  world.play(
-    cmd === 'skill:recovery' || cmd === 'skill:prayer'
-      ? 'heal'
-      : cmd === 'attack'
-        ? 'attack'
-        : cmd.startsWith('skill:')
-          ? 'star'
-          : cmd.startsWith('item:')
+  const finalState = structuredClone(state),
+    finalBattle = structuredClone(battle);
+  const phases = result.phases ?? [
+    {
+      kind: 'ally' as const,
+      state: structuredClone(state),
+      battle: structuredClone(battle),
+      hpChanges: result.hpChanges,
+      lines: result.lines,
+    },
+  ];
+  const phaseChanges = phases.reduce((n, p) => n + p.hpChanges.length, 0);
+  state = beforeState;
+  battle = beforeBattle;
+  turnText = '';
+  turnPlayback = new CombatPlayback(
+    phases,
+    (phase) => {
+      battlePhaseKind = phase.kind;
+      turnText =
+        phase.kind === 'enemy'
+          ? `${enemies[phase.battle.id].name}が攻撃の構え。`
+          : phase.kind === 'support'
+            ? 'リリアの手当て。'
+            : `${actorName(actingActor)}の行動。`;
+      if (phase.kind === 'enemy') {
+        world.playEnemyAttack(
+          phase.hpChanges.filter((c) => c.amount < 0).map((c) => c.target),
+        );
+        audio.fx('attack');
+      } else {
+        const animation =
+          phase.kind === 'support' ||
+          cmd.startsWith('item:') ||
+          ['skill:recovery', 'skill:prayer'].includes(cmd)
             ? 'heal'
-            : 'guard',
-    1.1,
-    actingActor,
-    target,
+            : cmd === 'attack'
+              ? 'attack'
+              : cmd === 'guard'
+                ? 'guard'
+                : 'star';
+        world.play(
+          animation,
+          0.9,
+          phase.kind === 'support' ? 'lilia' : actingActor,
+          target === 'hero' || target === 'lilia' ? target : undefined,
+        );
+        audio.fx(
+          animation === 'guard'
+            ? 'confirm'
+            : (animation as 'heal' | 'star' | 'attack'),
+        );
+      }
+      draw();
+    },
+    (phase) => {
+      state = structuredClone(phase.state);
+      battle = structuredClone(phase.battle);
+      displayHPChanges(phase.hpChanges);
+      world.reactToDamage(phase.hpChanges);
+      turnText = phase.lines.map(esc).join('<br>');
+      if (phase.lines.some((line) => line.startsWith('予兆：')))
+        audio.fx('warning');
+      draw();
+    },
+    () => {
+      state = finalState;
+      battle = finalBattle;
+      turnPlayback = null;
+      displayHPChanges(result.hpChanges.slice(phaseChanges));
+      if (result.victory && battle.id === 'ch02-collector') {
+        collectorVictory(state);
+        checkpoint();
+      }
+      turnText = result.lines.map(esc).join('<br>');
+      draw();
+    },
   );
-  if (result.lines.some((line) => line.startsWith('予兆：')))
-    audio.fx('warning');
-  turnText = result.lines.map(esc).join('<br>');
   mode = 'turn';
   battleMenu = 'root';
   keys.clear();
   turnAfter = () => {
+    if (turnPlayback) return;
     if (result.defeat) {
       mode = 'defeat';
       draw();
@@ -554,7 +653,7 @@ function action(id: string) {
       return;
     }
     if (id === 'battleBack' && battleMenu !== 'root') {
-      if (battleMenu === 'targets') {
+      if (battleMenu === 'targets' || battleMenu === 'enemies') {
         battleMenu = targetOrigin;
         targetCommand = null;
         draw();
@@ -564,6 +663,22 @@ function action(id: string) {
       battleMenu = 'root';
       keys.clear();
       draw(origin);
+      return;
+    }
+    if (battleMenu === 'enemies' && id.startsWith('enemy:') && targetCommand) {
+      command(targetCommand, id.slice(6) as BattleTarget);
+      return;
+    }
+    if (
+      battle.connections &&
+      ((battleMenu === 'root' && id === 'attack') ||
+        (battleMenu === 'skills' &&
+          ['skill:star-slash', 'skill:star-sever'].includes(id)))
+    ) {
+      targetCommand = id as Command;
+      targetOrigin = battleMenu as 'root' | 'skills';
+      battleMenu = 'enemies';
+      draw();
       return;
     }
     if (battleMenu === 'targets' && id.startsWith('target:') && targetCommand) {
@@ -656,7 +771,11 @@ ui.addEventListener('click', (e) => {
 });
 function interact() {
   const landmark = maps[state.map].landmarks.find(
-    (p) => Math.hypot(p.x - state.x, p.z - state.z) < 2.7,
+    (p) =>
+      Math.hypot(
+        world.landmarkPosition(p.id, p).x - state.x,
+        world.landmarkPosition(p.id, p).z - state.z,
+      ) < 2.7,
   );
   if (landmark) {
     if (state.chapter) {
@@ -808,6 +927,7 @@ window.addEventListener('blur', () => {
   heldInputs.clear();
 });
 function update(dt: number) {
+  turnPlayback?.update(performance.now());
   if (mode === 'chapterTitle' && performance.now() - titleStarted >= 3000)
     finishTitle();
   if (mode !== 'explore') {
@@ -828,11 +948,12 @@ function update(dt: number) {
     const speed = 3.1;
     const x = state.x + dx * dt * speed,
       z = state.z + dz * dt * speed;
-    if (world.walkable(x, state.z)) state.x = x;
-    if (world.walkable(state.x, z)) state.z = z;
+    if (world.walkable(x, state.z, state.x, state.z)) state.x = x;
+    if (world.walkable(state.x, z, state.x, state.z)) state.z = z;
     world.direction =
       Math.abs(dx) > Math.abs(dz) ? (dx < 0 ? 1 : 2) : dz < 0 ? 3 : 0;
   }
+  world.updateExploration(state, dt);
   if (state.map === 'entrance' && state.z < 7 && !cry && !state.lilia) {
     cry = true;
     state.flags.push('heardCry');
@@ -840,7 +961,11 @@ function update(dt: number) {
     return;
   }
   const p = maps[state.map].landmarks.find(
-    (p) => Math.hypot(p.x - state.x, p.z - state.z) < 2.7,
+    (p) =>
+      Math.hypot(
+        world.landmarkPosition(p.id, p).x - state.x,
+        world.landmarkPosition(p.id, p).z - state.z,
+      ) < 2.7,
   );
   const nextContext = p ? p.label : '';
   if (context !== nextContext) {
@@ -861,17 +986,29 @@ function update(dt: number) {
     });
     return;
   }
+  if (state.flags.includes('ch02:started') && secondEvent(state)) {
+    resumeChapter();
+    return;
+  }
   for (const e of maps[state.map].encounters) {
     if (
       !state.defeated.includes(e.id) &&
-      Math.hypot(e.x - state.x, e.z - state.z) < 1.7
+      Math.hypot(
+        (world.encounterMovement.positions.get(e.id)?.x ?? e.x) - state.x,
+        (world.encounterMovement.positions.get(e.id)?.z ?? e.z) - state.z,
+      ) < 1.7
     ) {
       if (!state.sword) {
         state.z = e.z + 2;
         message('先に落ちている剣を拾おう。');
         return;
       }
-      if (e.id === 'bellkeeper') {
+      if (e.id === 'ch02-collector') {
+        if (!state.flags.includes('ch02:sever')) return;
+        state.z = e.z + 4;
+        checkpoint();
+        enterBattle(e.id);
+      } else if (e.id === 'bellkeeper') {
         state.z = e.z + 4;
         checkpoint();
         talk('bellkeeper', () => enterBattle('bellkeeper'));
@@ -938,6 +1075,29 @@ function exploreChapter() {
 }
 function resumeChapter() {
   if (!state.chapter) return;
+  if (state.flags.includes('ch02:started')) {
+    if (!state.flags.includes('ch02:title')) {
+      showChapterTitle(secondTitle, resumeChapter, () => {
+        state.chapter!.titleShown = true;
+        mark(state, 'ch02:title');
+      });
+      return;
+    }
+    const event = secondEvent(state);
+    if (event) {
+      talk(event.id, () => {
+        finishSecondEvent(state, event);
+        if (event.flag === 'ch02:sever') {
+          audio.fx('star');
+          world.play('star', 1.1, 'hero');
+        }
+        world.build(state.map);
+        checkpoint();
+        resumeChapter();
+      });
+    } else exploreChapter();
+    return;
+  }
   if (!state.chapter.titleShown) {
     showChapterTitle();
     return;
@@ -983,6 +1143,45 @@ function resumeChapter() {
   } else exploreChapter();
 }
 function chapterInteract(id: string) {
+  if (state.flags.includes('ch02:started')) {
+    if (id === 'depot') {
+      changeChapterMap('merca-depot');
+      return;
+    }
+    if (id === 'exit-depot') {
+      if (secondEvent(state)) resumeChapter();
+      else changeChapterMap('merca');
+      return;
+    }
+    if (id === 'office') {
+      if (!state.flags.includes('ch02:rest-entry'))
+        message('先にカイの仕事場で配送控えを確認しよう。');
+      else changeChapterMap('merca-office');
+      return;
+    }
+    if (id === 'ch02-supply') {
+      if (state.flags.includes('ch02:supply')) {
+        message('救護箱は空だ。');
+        return;
+      }
+      state.herbs = Math.min(99, state.herbs + 2);
+      mark(state, 'ch02:supply');
+      checkpoint();
+    }
+    if (id === 'records' && state.flags.includes('ch02:records')) {
+      talk('ch02_records', exploreChapter);
+      return;
+    }
+    if (id === 'manifest' && state.flags.includes('ch02:manifest')) {
+      talk('ch02_manifest', exploreChapter);
+      return;
+    }
+    const after =
+      state.flags.includes('ch02:shutdown') && dialogues[id + '_after'];
+    const key = after ? id + '_after' : id;
+    if (dialogues[key]) talk(key, exploreChapter);
+    return;
+  }
   if (id === 'keeper') {
     const restored = state.flags.includes('ch01:restored');
     talk(restored ? 'keeper_restored' : 'keeper', () => {
@@ -1021,6 +1220,10 @@ function updateChapterTravel() {
   const north = state.z < maps[map].exit;
   const south = state.z > maps[map].length / 2 - 3;
   if (!north && !south) return;
+  if (state.flags.includes('ch02:started')) {
+    updateSecondTravel(north, south);
+    return;
+  }
   if (map === 'village' && south) {
     state.z = maps.village.length / 2 - 3;
     keys.clear();
@@ -1066,9 +1269,10 @@ function updateChapterTravel() {
       map === 'road',
     );
   } else if (north && map === 'road') {
-    state.z = maps.road.exit + 1;
-    keys.clear();
-    message('第一章完了。交易都市での冒険は第二章へ続く。');
+    if (beginSecondChapter(state)) {
+      checkpoint();
+      resumeChapter();
+    }
   }
 }
 function changeChapterMap(map: State['map'], back = false, fromRoad = false) {
@@ -1097,6 +1301,33 @@ function loop(now: number) {
   if (world) {
     update(dt);
     world.render(state, battle, dt, mode);
+    statusOverlay.hidden =
+      !battle || !['battle', 'turn', 'defeat', 'dialogue'].includes(mode);
+    if (battle && !statusOverlay.hidden) {
+      const statuses = battleStatuses(state, battle);
+      for (const actor of ['hero', 'lilia', 'enemy'] as const) {
+        const node = statusGroups.get(actor)!;
+        const markup = statusMarkup(statuses[actor]);
+        if (node.dataset.icons !== markup) {
+          node.innerHTML = markup;
+          node.dataset.icons = markup;
+        }
+        const sprite =
+          actor === 'hero'
+            ? world.player
+            : actor === 'lilia'
+              ? world.companion
+              : world.enemySprites.get(battle.id);
+        node.hidden = actor === 'lilia' && !state.lilia;
+        if (sprite) {
+          const head = sprite.position.clone();
+          head.y += sprite.scale.y * 0.86;
+          head.project(world.camera);
+          node.style.left = `${((head.x + 1) * innerWidth) / 2}px`;
+          node.style.top = `${((1 - head.y) * innerHeight) / 2}px`;
+        }
+      }
+    }
     const nowFeedback = performance.now();
     combatNumbers = combatNumbers.filter((entry) => {
       const age = nowFeedback - entry.started;
@@ -1113,6 +1344,8 @@ function loop(now: number) {
       if (sprite) {
         const point = sprite.position.clone();
         point.y += sprite.scale.y * 0.6;
+        if (entry.change.target.startsWith('connection:'))
+          point.x += entry.change.target === 'connection:0' ? -2 : 2;
         point.project(world.camera);
         entry.node.style.visibility = 'visible';
         entry.node.style.left = `${((point.x + 1) * innerWidth) / 2}px`;
@@ -1170,3 +1403,60 @@ async function boot() {
   }
 }
 void boot();
+
+function updateSecondTravel(north: boolean, south: boolean) {
+  const map = state.map;
+  const stop = (text: string) => {
+    state.z = north ? maps[map].exit + 1 : maps[map].length / 2 - 4;
+    keys.clear();
+    message(text);
+  };
+  if (map === 'north-road') {
+    stop('第二章完了。観測塔での冒険は第三章へ続く。');
+    return;
+  }
+  if (map === 'merca' && north) {
+    if (!state.flags.includes('ch02:rest-exit')) {
+      stop('出発前に、街の調査とカイの仕事場での休息を済ませよう。');
+      return;
+    }
+    stop('');
+    talk('ch02_departure', () => {
+      departSecondChapter(state);
+      world.build(state.map);
+      checkpoint();
+      exploreChapter();
+    });
+    return;
+  }
+  if (map === 'merca' && south) {
+    stop('メルカの異変を確かめよう。');
+    return;
+  }
+  if (map === 'merca-depot') {
+    changeChapterMap('merca');
+    return;
+  }
+  if (map === 'merca-office') {
+    if (north) changeChapterMap('merca-waterway');
+    else changeChapterMap('merca');
+    return;
+  }
+  if (map === 'merca-waterway') {
+    if (north) {
+      if (!state.flags.includes('ch02:sever')) {
+        stop('セナと導管の接続を確かめよう。');
+        return;
+      }
+      changeChapterMap('merca-core');
+    } else changeChapterMap('merca-office', true);
+    return;
+  }
+  if (map === 'merca-core') {
+    if (south) changeChapterMap('merca-waterway', true);
+    else {
+      stop('コレクターを止めて住民を救おう。');
+      if (!state.flags.includes('ch02:boss')) enterBattle('ch02-collector');
+    }
+  }
+}

@@ -6,7 +6,13 @@ export type MapId =
   | 'belfry'
   | 'undercroft'
   | 'sanctum'
-  | 'road';
+  | 'road'
+  | 'merca'
+  | 'merca-depot'
+  | 'merca-office'
+  | 'merca-waterway'
+  | 'merca-core'
+  | 'north-road';
 export type EnemyId =
   | 'rescue'
   | 'wolf1'
@@ -17,7 +23,10 @@ export type EnemyId =
   | 'boss'
   | 'mist1'
   | 'mist2'
-  | 'bellkeeper';
+  | 'bellkeeper'
+  | 'ch02-work-machine'
+  | 'ch02-memory-moth'
+  | 'ch02-collector';
 export const enemies: Record<
   EnemyId,
   {
@@ -27,8 +36,35 @@ export const enemies: Record<
     speed: number;
     art: string;
     boss?: boolean;
+    connections?: { name: string; hp: number; severable: boolean }[];
   }
 > = {
+  'ch02-work-machine': {
+    name: '霧憑きの作業機',
+    hp: 128,
+    attack: 14,
+    speed: 4,
+    art: 'workMachine',
+  },
+  'ch02-memory-moth': {
+    name: '記憶喰いの魔蛾',
+    hp: 140,
+    attack: 16,
+    speed: 7,
+    art: 'moth',
+  },
+  'ch02-collector': {
+    name: '記憶徴収機《コレクター》',
+    hp: 360,
+    attack: 14,
+    speed: 3,
+    art: 'collector',
+    boss: true,
+    connections: [
+      { name: '左吸収器', hp: 64, severable: true },
+      { name: '右吸収器', hp: 64, severable: true },
+    ],
+  },
   mist1: { name: '鐘楼の霧憑き', hp: 125, attack: 14, speed: 4, art: 'wolf' },
   mist2: { name: '記憶喰いの魔蛾', hp: 145, attack: 16, speed: 7, art: 'moth' },
   bellkeeper: {
@@ -61,6 +97,79 @@ export const enemies: Record<
   },
 };
 export const maps = {
+  merca: {
+    name: '交易都市メルカ',
+    length: 54,
+    spawn: [0, 20],
+    exit: -22,
+    encounters: [],
+    landmarks: [
+      { id: 'kai', x: 0, z: 10, label: 'カイに話す' },
+      { id: 'toma', x: 3, z: 10, label: 'トーマに話す' },
+      { id: 'merchant', x: -3, z: 16, label: '商人に話す' },
+      { id: 'craftsman', x: -3, z: -1, label: '職人に話す' },
+      { id: 'family', x: 3, z: -6, label: '親子に話す' },
+      { id: 'depot', x: -3, z: 3, label: 'カイの仕事場へ' },
+      { id: 'office', x: 0, z: -14, label: '管理施設へ' },
+      { id: 'notice', x: 3, z: 0, label: '事業の掲示を読む' },
+    ],
+  },
+  'merca-depot': {
+    name: 'カイの仕事場',
+    length: 30,
+    spawn: [0, 9],
+    exit: -11,
+    encounters: [],
+    landmarks: [
+      { id: 'manifest', x: 0, z: 0, label: '配送控えと休息' },
+      { id: 'exit-depot', x: 0, z: 9, label: '市場へ戻る' },
+    ],
+  },
+  'merca-office': {
+    name: '水質改善事業・管理施設',
+    length: 32,
+    spawn: [0, 10],
+    exit: -12,
+    encounters: [],
+    landmarks: [
+      { id: 'manager', x: 0, z: -3, label: '管理責任者に話す' },
+      { id: 'sena', x: 3, z: 1, label: 'セナに話す' },
+    ],
+  },
+  'merca-waterway': {
+    name: 'メルカ地下水路・保守通路',
+    length: 64,
+    spawn: [0, 25],
+    exit: -26,
+    encounters: [
+      { id: 'ch02-work-machine' as EnemyId, x: 2, z: 16 },
+      { id: 'ch02-memory-moth' as EnemyId, x: -2, z: -11 },
+    ],
+    landmarks: [
+      { id: 'flow', x: 0, z: 6, label: '導管と保守記録' },
+      { id: 'ch02-supply', x: 3, z: -17, label: '救護箱を調べる' },
+    ],
+  },
+  'merca-core': {
+    name: '小型星環炉・中枢室',
+    length: 40,
+    spawn: [0, 14],
+    exit: -15,
+    encounters: [{ id: 'ch02-collector' as EnemyId, x: 0, z: -7 }],
+    landmarks: [
+      { id: 'shutdown', x: 3, z: -10, label: '停止盤' },
+      { id: 'records', x: -3, z: -10, label: '記録庫' },
+    ],
+  },
+  'north-road': {
+    name: '北方街道・観測塔への分岐',
+    length: 38,
+    spawn: [0, 10],
+    exit: -14,
+    encounters: [],
+    landmarks: [{ id: 'north-sign', x: 0, z: -8, label: '観測塔方面の道標' }],
+  },
+
   village: {
     name: 'アルネ村',
     length: 54,

@@ -10,7 +10,9 @@
     "format": "prettier --write src tests scripts/*.mjs package.json tsconfig.json vite.config.ts README.md docs/*.md",
     "test:browser": "node scripts/awakening-healing-checks.mjs && node scripts/revision-checks.mjs && node scripts/browser-edges.mjs && node scripts/audio-fallback.mjs && node scripts/battle-visual.mjs && node scripts/playthrough.mjs",
     "test:chapter": "node scripts/chapter-01-checks.mjs && node scripts/chapter-01-edges.mjs",
-    "test:mp": "node scripts/mp-growth-visual-checks.mjs"
+    "test:mp": "node scripts/mp-growth-visual-checks.mjs",
+    "test:chapter2": "node scripts/chapter-02-checks.mjs",
+    "test:world": "node scripts/world-revision-checks.mjs"
   },
   "dependencies": {
     "three": "^0.180.0"

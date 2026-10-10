@@ -1,0 +1,111 @@
+{
+  "date": "2026-10-10",
+  "generator": "built-in image_gen",
+  "python": ".venv/bin/python",
+  "assets": [
+    {
+      "name": "town-shop",
+      "prompt": "One isolated detailed pixel art HD-2D fantasy JRPG medieval MARKET SHOP building. Timber beams, warm plaster, blue tile pitched roof, green striped canopy, display baskets and open shopfront, flower window boxes and brass lantern, no text. Orthographic 3/4 front view matching classic Japanese RPG town assets, full roof to foundation, central 70% safe area on solid #FF00FF, no ground plane scenery shadows or borders. Visually rich handcrafted pixels, warm daylight.",
+      "reference": null,
+      "raw": "/Users/komachi/.codex/generated_images/01a11b80-3a41-7260-b58a-5e0e781a907d/exec-618bf605-eb92-4ead-a83d-e5653da4f675.png",
+      "output": "public/assets/revision/town-shop.png",
+      "qc": "art-source/revision/town-shop/pipeline-meta.json"
+    },
+    {
+      "name": "town-house",
+      "prompt": "One isolated detailed pixel art HD-2D fantasy JRPG small RESIDENTIAL HOUSE building. White plaster, reddish brick foundation, steep terracotta roof with dormer, modest wooden door, asymmetric chimney and flowering balcony, no shop awning. Orthographic 3/4 front view, full roof to foundation, central 70% safe area on solid #FF00FF, no ground plane scenery shadows text or borders. Match classic Japanese RPG town assets, richly shaded handcrafted pixels.",
+      "reference": null,
+      "raw": "/Users/komachi/.codex/generated_images/01a11b80-3a41-7260-b58a-5e0e781a907d/exec-3799dbb1-7172-4345-a650-9b0aceb1405c.png",
+      "output": "public/assets/revision/town-house.png",
+      "qc": "art-source/revision/town-house/pipeline-meta.json"
+    },
+    {
+      "name": "town-manor",
+      "prompt": "One isolated detailed pixel art HD-2D fantasy JRPG MUNICIPAL MANOR building, two-story pale stone, dark slate hipped roof, arched double door, two symmetrical bay windows, brass royal emblem, courtyard plants attached to steps. Visibly different large elegant silhouette from a timber shop or cottage. Orthographic 3/4 front view, full roof to foundation in central 70% safe area, solid #FF00FF, no ground plane scenery shadows text or borders. Detailed warm fantasy pixels.",
+      "reference": null,
+      "raw": "/Users/komachi/.codex/generated_images/01a11b80-3a41-7260-b58a-5e0e781a907d/exec-ae666b0e-98a9-44ab-bae2-84978ef8443b.png",
+      "output": "public/assets/revision/town-manor.png",
+      "qc": "art-source/revision/town-manor/pipeline-meta.json"
+    },
+    {
+      "name": "river",
+      "prompt": "A seamless top-down game texture tile of flowing turquoise RIVER WATER, detailed hand-painted pixel art for HD-2D Japanese style fantasy RPG. Rectangular water surface only, tiny cyan wavelets and darker blue depths, no shoreline no objects no foam border no text, seamless all four edges, fills entire square image with opaque water. Orthographic overhead camera. Not photorealistic, crisp lovingly painted pixels.",
+      "reference": null,
+      "raw": "/Users/komachi/.codex/generated_images/01a11b80-3a41-7260-b58a-5e0e781a907d/exec-20d9f64e-08c5-4084-b0d5-ac3aefc27c19.png",
+      "output": "public/assets/revision/river.png",
+      "qc": "art-source/revision/river/pipeline-meta.json"
+    },
+    {
+      "name": "bridge",
+      "prompt": "One isolated game map prop, fantasy HD-2D pixel art STONE BRIDGE crossing LEFT TO RIGHT, orthographic top-down with very slight 3/4 elevation. Wide horizontal stone deck aligned east-west, low side parapets above and below, cobbled walkway with clear center, modest moss on side stones, no water or ground included. Full complete bridge centrally framed with 15% solid #FF00FF margin all sides, no shadows text labels or border. Classic Japanese RPG aesthetic; collision footprint is horizontal rectangle, do not rotate diagonally.",
+      "reference": null,
+      "raw": "/Users/komachi/.codex/generated_images/01a11b80-3a41-7260-b58a-5e0e781a907d/exec-74fdf21d-042b-4a9e-a88d-5177e905dc9a.png",
+      "output": "public/assets/revision/bridge.png",
+      "qc": "art-source/revision/bridge/pipeline-meta.json"
+    },
+    {
+      "name": "npc-kai",
+      "prompt": "Create an exact 4x4 directional WALK sprite sheet for the SAME kai NPC in reference, preserving identity, clothing, proportions and detailed pixel art. Reference is identity/style only, not grid. Four rows: row1 FRONT facing camera; row2 LEFT side profile; row3 RIGHT side profile; row4 BACK facing away. Each row four successive gentle walking frames, frame1 neutral standing. No unrelated poses. Every full figure centered inside central 65% of each equal cell, SAME standing body size and camera distance across 16 frames, same feet line. Solid #FF00FF background everywhere, no shadows text borders grid lines props or effects, nothing crossing any cell edge. Clearly readable left/right profiles and front/back silhouettes.",
+      "reference": "chapter-02/kai.png",
+      "raw": "/Users/komachi/.codex/generated_images/01a11b80-3a41-7260-b58a-5e0e781a907d/exec-9dc56895-60cd-4e9c-bc44-f83809e04bf9.png",
+      "output": "public/assets/revision/npc-kai.png",
+      "qc": "art-source/revision/npc-kai/pipeline-meta.json"
+    },
+    {
+      "name": "npc-toma",
+      "prompt": "Create an exact 4x4 directional WALK sprite sheet for the SAME toma NPC in reference, preserving identity, clothing, proportions and detailed pixel art. Reference is identity/style only, not grid. Four rows: row1 FRONT facing camera; row2 LEFT side profile; row3 RIGHT side profile; row4 BACK facing away. Each row four successive gentle walking frames, frame1 neutral standing. No unrelated poses. Every full figure centered inside central 65% of each equal cell, SAME standing body size and camera distance across 16 frames, same feet line. Solid #FF00FF background everywhere, no shadows text borders grid lines props or effects, nothing crossing any cell edge. Clearly readable left/right profiles and front/back silhouettes.",
+      "reference": "chapter-02/toma.png",
+      "raw": "/Users/komachi/.codex/generated_images/01a11b80-3a41-7260-b58a-5e0e781a907d/exec-61b84dd0-98a6-4faa-b2cc-dde94e189996.png",
+      "output": "public/assets/revision/npc-toma.png",
+      "qc": "art-source/revision/npc-toma/pipeline-meta.json"
+    },
+    {
+      "name": "npc-sena",
+      "prompt": "Create an exact 4x4 directional WALK sprite sheet for the SAME sena NPC in reference, preserving identity, clothing, proportions and detailed pixel art. Reference is identity/style only, not grid. Four rows: row1 FRONT facing camera; row2 LEFT side profile; row3 RIGHT side profile; row4 BACK facing away. Each row four successive gentle walking frames, frame1 neutral standing. No unrelated poses. Every full figure centered inside central 65% of each equal cell, SAME standing body size and camera distance across 16 frames, same feet line. Solid #FF00FF background everywhere, no shadows text borders grid lines props or effects, nothing crossing any cell edge. Clearly readable left/right profiles and front/back silhouettes.",
+      "reference": "chapter-02/sena.png",
+      "raw": "/Users/komachi/.codex/generated_images/01a11b80-3a41-7260-b58a-5e0e781a907d/exec-445e0058-9409-4c13-8cdf-6b7ddfea7e8b.png",
+      "output": "public/assets/revision/npc-sena.png",
+      "qc": "art-source/revision/npc-sena/pipeline-meta.json"
+    },
+    {
+      "name": "npc-manager",
+      "prompt": "Create an exact 4x4 directional WALK sprite sheet for the SAME manager NPC in reference, preserving identity, clothing, proportions and detailed pixel art. Reference is identity/style only, not grid. Four rows: row1 FRONT facing camera; row2 LEFT side profile; row3 RIGHT side profile; row4 BACK facing away. Each row four successive gentle walking frames, frame1 neutral standing. No unrelated poses. Every full figure centered inside central 65% of each equal cell, SAME standing body size and camera distance across 16 frames, same feet line. Solid #FF00FF background everywhere, no shadows text borders grid lines props or effects, nothing crossing any cell edge. Clearly readable left/right profiles and front/back silhouettes.",
+      "reference": "chapter-02/manager.png",
+      "raw": "/Users/komachi/.codex/generated_images/01a11b80-3a41-7260-b58a-5e0e781a907d/exec-62f360dc-8af5-42cf-9aa2-0914d53db696.png",
+      "output": "public/assets/revision/npc-manager.png",
+      "qc": "art-source/revision/npc-manager/pipeline-meta.json"
+    },
+    {
+      "name": "npc-elder",
+      "prompt": "Create an exact 4x4 directional WALK sprite sheet for the SAME elder NPC in reference, preserving identity, clothing, proportions and detailed pixel art. Reference is identity/style only, not grid. Four rows: row1 FRONT facing camera; row2 LEFT side profile; row3 RIGHT side profile; row4 BACK facing away. Each row four successive gentle walking frames, frame1 neutral standing. No unrelated poses. Every full figure centered inside central 65% of each equal cell, SAME standing body size and camera distance across 16 frames, same feet line. Solid #FF00FF background everywhere, no shadows text borders grid lines props or effects, nothing crossing any cell edge. Clearly readable left/right profiles and front/back silhouettes.",
+      "reference": "chapter-01/keeper.png",
+      "raw": "/Users/komachi/.codex/generated_images/01a11b80-3a41-7260-b58a-5e0e781a907d/exec-0dbf8c14-5cc4-418e-b30d-1f0a2b57d11e.png",
+      "output": "public/assets/revision/npc-elder.png",
+      "qc": "art-source/revision/npc-elder/pipeline-meta.json"
+    },
+    {
+      "name": "npc-adult",
+      "prompt": "Create an exact 4x4 directional WALK sprite sheet for the SAME adult NPC in reference, preserving identity, clothing, proportions and detailed pixel art. Reference is identity/style only, not grid. Four rows: row1 FRONT facing camera; row2 LEFT side profile; row3 RIGHT side profile; row4 BACK facing away. Each row four successive gentle walking frames, frame1 neutral standing. No unrelated poses. Every full figure centered inside central 65% of each equal cell, SAME standing body size and camera distance across 16 frames, same feet line. Solid #FF00FF background everywhere, no shadows text borders grid lines props or effects, nothing crossing any cell edge. Clearly readable left/right profiles and front/back silhouettes.",
+      "reference": "chapter-01/villager-adult.png",
+      "raw": "/Users/komachi/.codex/generated_images/01a11b80-3a41-7260-b58a-5e0e781a907d/exec-650b0450-7f98-4372-b6fc-eb1478928240.png",
+      "output": "public/assets/revision/npc-adult.png",
+      "qc": "art-source/revision/npc-adult/pipeline-meta.json"
+    },
+    {
+      "name": "npc-child",
+      "prompt": "Create an exact 4x4 directional WALK sprite sheet for the SAME child NPC in reference, preserving identity, clothing, proportions and detailed pixel art. Reference is identity/style only, not grid. Four rows: row1 FRONT facing camera; row2 LEFT side profile; row3 RIGHT side profile; row4 BACK facing away. Each row four successive gentle walking frames, frame1 neutral standing. No unrelated poses. Every full figure centered inside central 65% of each equal cell, SAME standing body size and camera distance across 16 frames, same feet line. Solid #FF00FF background everywhere, no shadows text borders grid lines props or effects, nothing crossing any cell edge. Clearly readable left/right profiles and front/back silhouettes.",
+      "reference": "chapter-01/villager-child.png",
+      "raw": "/Users/komachi/.codex/generated_images/01a11b80-3a41-7260-b58a-5e0e781a907d/exec-66ea88b4-aa08-4143-8224-27611f67a26a.png",
+      "output": "public/assets/revision/npc-child.png",
+      "qc": "art-source/revision/npc-child/pipeline-meta.json"
+    },
+    {
+      "name": "lilia-attack",
+      "prompt": "Regenerate this exact Lilia 2x2 STAFF ATTACK sheet with stricter cell containment. Preserve character identity, green hood, cream outfit, brown boots, braid and satchel, pixel art style. Four poses facing RIGHT: ready, windup, SHORT downward staff strike with elbows bent and staff close to body, recovery. Staff must be SHORT, never reach beyond central 60% of any cell. Same anatomical standing scale in all cells, same feet y, root centered. NO horizontal thrust, no elongated extension, no FX, no shadows. Each square cell has at least 20% pure #FF00FF padding on ALL sides, absolutely no crossing cell boundaries. Exact 2x2 equal grid on solid #FF00FF. This replaces the prior strike that reached the cell edge.",
+      "reference": "Lilia identity / previous attack draft",
+      "raw": "/Users/komachi/.codex/generated_images/01a11b80-3a41-7260-b58a-5e0e781a907d/exec-481c6ca8-72ec-4ef0-bf35-713b56917244.png",
+      "output": "public/assets/revision/lilia-attack.png",
+      "qc": "art-source/revision/lilia-attack-v2/pipeline-meta.json"
+    }
+  ]
+}

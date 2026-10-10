@@ -78,7 +78,7 @@ for (const scenario of [
   'save-resume',
   'teleport',
 ] as const) {
-  test(`party snaps on first frame of ${scenario}, then resumes smooth following`, () => {
+  test(`party snaps on first frame of ${scenario}, then follows the recorded path`, () => {
     const s = fresh();
     s.lilia = true;
     s.sword = true;
@@ -98,13 +98,13 @@ for (const scenario of [
     }
     const first = placement.update(s, false, 0.016);
     assert.equal(first.snap, true);
-    assert.deepEqual(first.companion, { x: s.x - 1.2, y: 0.05, z: s.z + 1.6 });
+    assert.deepEqual(first.companion, { x: s.x, y: 0.05, z: s.z + 1.6 });
     assert.deepEqual(first.camera, { x: s.x, y: 0, z: s.z - 2 });
     s.x += 0.1;
     const walking = placement.update(s, false, 0.016);
     assert.equal(walking.snap, false);
-    assert.ok(walking.companion.x > first.companion.x);
-    assert.ok(walking.companion.x < s.x - 1.2);
+    assert.equal(walking.companion.x, first.companion.x);
+    assert.ok(walking.companion.z < first.companion.z);
     assert.equal(walking.companion.y, 0.05);
   });
 }
@@ -114,5 +114,5 @@ test('joining resets the rescue position before the next draw', () => {
   assert.deepEqual(p.update(s, false, 0.016).companion, { x: 2, y: 0, z: -13 });
   s.lilia = true;
   assert.equal(p.update(s, false, 0.016).snap, true);
-  assert.deepEqual(p.companion, { x: -1.2, y: 0.05, z: 28.6 });
+  assert.deepEqual(p.companion, { x: 0, y: 0.05, z: 28.6 });
 });

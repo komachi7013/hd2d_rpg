@@ -5,6 +5,8 @@ import {
   actorHP,
   healActor,
   type Actor,
+  type BattlePhase,
+  type BattleTarget,
   type Battle,
   type Command,
   type State,
@@ -17,7 +19,7 @@ export function resolvePartyTurn(
   s: State,
   b: Battle,
   cmd: Command,
-  target?: Actor,
+  selectedTarget?: BattleTarget,
 ): TurnResult {
   const r: TurnResult = {
     lines: [],
@@ -27,6 +29,26 @@ export function resolvePartyTurn(
     defeat: false,
     awakening: false,
   };
+  let phaseHP = 0,
+    phaseLine = 0;
+  const capture = (kind: BattlePhase['kind']) => {
+    (r.phases ??= []).push({
+      kind,
+      state: structuredClone(s),
+      battle: structuredClone(b),
+      hpChanges: r.hpChanges.slice(phaseHP),
+      lines: r.lines.slice(phaseLine),
+    });
+    phaseHP = r.hpChanges.length;
+    phaseLine = r.lines.length;
+  };
+  const target =
+    selectedTarget === 'hero' || selectedTarget === 'lilia'
+      ? selectedTarget
+      : undefined;
+  const connectionIndex = selectedTarget?.startsWith('connection:')
+    ? Number(selectedTarget.split(':')[1])
+    : -1;
   const actor = b.actor;
   const name = actorName(actor);
   if (!s.chapter || actorHP(s, actor) <= 0 || b.hp <= 0) return r;
@@ -75,6 +97,13 @@ export function resolvePartyTurn(
       `${actorName(a)}に ${damage} ダメージ${b.guards.includes(a) ? '（防御）' : ''}。`,
     );
   };
+  if (
+    connectionIndex >= 0 &&
+    (!b.connections || !b.connections[connectionIndex])
+  ) {
+    r.lines.push('その吸収器は停止している。');
+    return r;
+  }
   r.used = true;
   if (enemies[b.id].speed > 5 && !b.enemyActed) {
     b.enemyActed = true;
@@ -88,6 +117,7 @@ export function resolvePartyTurn(
           : 'lilia',
       enemies[b.id].attack,
     );
+    capture('enemy');
     if (actorHP(s, actor) === 0) {
       b.acted.push(actor);
       r.defeat = s.hp === 0 && s.chapter.liliaHP === 0;
@@ -100,21 +130,52 @@ export function resolvePartyTurn(
   if (cmd === 'guard') {
     if (!b.guards.includes(actor)) b.guards.push(actor);
     r.lines.push(`${name}は身を守っている。`);
-  } else if (cmd === 'attack' || skill?.id === 'star-slash') {
+  } else if (
+    cmd === 'attack' ||
+    skill?.id === 'star-slash' ||
+    skill?.id === 'star-sever'
+  ) {
     const slash = skill?.id === 'star-slash';
     if (slash && b.armor) {
       b.armor = false;
       b.armorAge = 0;
       r.lines.push('一閃――精霊を覆う霧の鎧を切り裂いた！');
     }
-    const base = slash ? 64 : actor === 'hero' ? 42 : 22;
-    const damage = b.armor ? Math.ceil(base * 0.35) : base;
-    const before = b.hp;
-    b.hp = Math.max(0, b.hp - damage);
-    r.hpChanges.push({ target: 'enemy', amount: b.hp - before });
-    r.lines.push(
-      `${name}の${slash ? '一閃' : '攻撃'}。${enemies[b.id].name}に ${damage} ダメージ。`,
-    );
+    const base =
+      skill?.id === 'star-sever' ? 32 : slash ? 64 : actor === 'hero' ? 42 : 22;
+    const barrier = connectionIndex < 0 && b.connections?.some((hp) => hp > 0);
+    const damage = barrier
+      ? Math.ceil(base / 2)
+      : b.armor
+        ? Math.ceil(base * 0.35)
+        : base;
+    const before =
+      connectionIndex >= 0 ? b.connections![connectionIndex] : b.hp;
+    if (connectionIndex >= 0) {
+      b.connections![connectionIndex] = Math.max(
+        0,
+        b.connections![connectionIndex] - damage,
+      );
+      if (
+        skill?.id === 'star-sever' &&
+        enemies[b.id].connections?.[connectionIndex].severable
+      )
+        b.connections![connectionIndex] = 0;
+      r.lines.push(
+        `${enemies[b.id].connections![connectionIndex].name}に ${damage} ダメージ。${b.connections![connectionIndex] === 0 ? '接続解除。再接続はない。' : ''}`,
+      );
+    } else b.hp = Math.max(0, b.hp - damage);
+    r.hpChanges.push({
+      target:
+        connectionIndex >= 0
+          ? (`connection:${connectionIndex}` as 'connection:0' | 'connection:1')
+          : 'enemy',
+      amount: connectionIndex >= 0 ? -Math.min(before, damage) : b.hp - before,
+    });
+    if (connectionIndex < 0)
+      r.lines.push(
+        `${name}の${skill?.id === 'star-sever' ? '星断ち' : slash ? '一閃' : '攻撃'}。${enemies[b.id].name}に ${damage} ダメージ。`,
+      );
   } else if (skill?.effect.type === 'purify') {
     b.forgotten[target!] = 0;
     r.lines.push(`リリアの祈り。${actorName(target!)}の忘却が解けた。`);
@@ -127,9 +188,13 @@ export function resolvePartyTurn(
       `${herb ? '薬草' : 'リリアの回復'}。${actorName(target!)}のHPが ${healed} 回復。`,
     );
   }
+  capture('ally');
   b.acted.push(actor);
   r.victory = b.hp === 0;
-  if (r.victory) return r;
+  if (r.victory) {
+    if (b.connections) b.connections.fill(0);
+    return r;
+  }
   const pending = (['hero', 'lilia'] as Actor[]).find(
     (a) => actorHP(s, a) > 0 && !b.acted.includes(a),
   );
@@ -140,7 +205,29 @@ export function resolvePartyTurn(
   b.turn++;
   for (const a of ['hero', 'lilia'] as Actor[])
     b.forgotten[a] = Math.max(0, b.forgotten[a] - 1);
-  if (b.id === 'bellkeeper') {
+  if (b.id === 'ch02-collector') {
+    if (b.turn % 3 === 1) {
+      const victim: Actor = s.hp > 0 ? 'hero' : 'lilia';
+      if (b.connections?.some((hp) => hp > 0)) {
+        b.forgotten[victim] = 3;
+        r.lines.push(
+          `記憶吸収。${actorName(victim)}に忘却（3ラウンド）。祈りで解除できる。`,
+        );
+      }
+      hurt(victim, 10);
+    } else if (b.turn % 3 === 2) {
+      hurt(s.hp > 0 ? 'hero' : 'lilia', 14);
+      b.telegraph = true;
+      r.lines.push(
+        '予兆：圧縮が始まる。次は記憶奔流の全体攻撃。防御で備えよう！',
+      );
+    } else {
+      r.lines.push('記憶奔流――全体攻撃！');
+      hurt('hero', 24);
+      hurt('lilia', 24);
+      b.telegraph = false;
+    }
+  } else if (b.id === 'bellkeeper') {
     if (b.telegraph) {
       r.lines.push('霧憑きの鐘守の「黒鐘の共鳴」――全体攻撃！');
       hurt('hero', 26);
@@ -175,6 +262,8 @@ export function resolvePartyTurn(
       enemies[b.id].attack,
     );
   }
+  if (r.hpChanges.length > phaseHP || r.lines.length > phaseLine)
+    capture('enemy');
   r.defeat = s.hp === 0 && s.chapter.liliaHP === 0;
   b.enemyActed = false;
   b.acted = [];

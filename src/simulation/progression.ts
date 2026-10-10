@@ -51,7 +51,14 @@ export function awardVictory(s: State, enemy: EnemyId): string[] {
   const flag = `xp:${enemy}`;
   if (s.flags.includes(flag)) return [];
   s.flags.push(flag);
-  const xp = enemy === 'bellkeeper' ? 100 : enemy === 'mist2' ? 45 : 30;
+  const xp =
+    enemy === 'ch02-collector'
+      ? 120
+      : enemy === 'bellkeeper'
+        ? 100
+        : enemy === 'mist2'
+          ? 45
+          : 30;
   const lines = [`二人は経験値を ${xp} 獲得した。`];
   for (const actor of ['hero', 'lilia'] as Actor[]) {
     const p = party[actor];
